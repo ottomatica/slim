@@ -1,7 +1,6 @@
 #!/bin/bash
 WORKDIR=~/.slim
-OUTPUT_DIR=$(pwd)
-OUTPUT_NAME=slim.iso
+OUTPUT_PATH=$1
 
 # Prepare and reset build directories
 mkdir -p $WORKDIR
@@ -32,9 +31,10 @@ chmod +w baker-mount/boot/vmlinuz-virt
 cp file.img.gz baker-mount/boot/initramfs-virt
 
 # Needs `brew install cdrtools`
-mkisofs -b boot/syslinux/isolinux.bin -c boot/syslinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table   -V slim -o $OUTPUT_DIR/$OUTPUT_NAME -J -R baker-mount/
+mkisofs -b boot/syslinux/isolinux.bin -c boot/syslinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table   -V slim -o $OUTPUT_PATH -J -R baker-mount/
 
 echo
 echo "Created microkernel."
+OUTPUT_DIR=$(dirname $OUTPUT_PATH)
 cd $OUTPUT_DIR
-ls -lh | grep $OUTPUT_NAME
+ls -lh $OUTPUT_PATH
