@@ -1,6 +1,9 @@
 #!/bin/bash
 WORKDIR=~/.slim
 OUTPUT_PATH=$1
+ISO=$2
+
+echo $OUTPUT_PATH $ISO
 
 # Prepare and reset build directories
 mkdir -p $WORKDIR
@@ -14,7 +17,6 @@ chmod -R +w baker-mount
 rm -rf baker-mount
 
 # Mount base alpine iso
-ISO=~/Downloads/alpine-virt-3.8.0-x86_64.iso
 DISK=$(hdiutil attach -nomount $ISO | head -n 1 | cut -f 1)
 echo "base image mounted on $DISK"
 
