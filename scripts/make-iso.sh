@@ -37,4 +37,4 @@ mkisofs -b boot/syslinux/isolinux.bin -c boot/syslinux/boot.cat -no-emul-boot -b
 echo
 echo "Created microkernel."
 cd $OUTPUT_DIR
-ls -lh
+ls -lh | grep $OUTPUT_NAME

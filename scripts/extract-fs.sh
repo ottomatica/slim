@@ -7,7 +7,7 @@ WORKDIR=~/.slim
 mkdir -p $WORKDIR
 cd $WORKDIR
 rm -rf alpine-tmp alpine-vm
-rm -rf /tmp/file.img.gz
+rm -rf file.img.gz file.img
 
 # terminate early if commands fail
 set -e 
@@ -36,7 +36,7 @@ rm layer.tar
 #echo "copy randomness"
 #cat /dev/urandom | head -c 5000 > etc/random-seed || echo $?
 
-echo "creating /tmp/file.img"
+echo "creating file.img"
 find . | cpio -o -H newc > $WORKDIR/file.img;
 cd $WORKDIR
 echo "compressing img"
