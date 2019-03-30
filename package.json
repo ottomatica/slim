@@ -1,0 +1,30 @@
+{
+  "name": "slim",
+  "version": "1.0.0",
+  "description": "small and sleek computing environments",
+  "main": "index.js",
+  "bin": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ottomatica/slim.git"
+  },
+  "keywords": [
+    "virtual",
+    "box",
+    "vm",
+    "microkernel"
+  ],
+  "author": "ottomatica",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/ottomatica/slim/issues"
+  },
+  "homepage": "https://github.com/ottomatica/slim#readme",
+  "dependencies": {
+    "chalk": "^2.4.2",
+    "node-virtualbox": "^0.1.36"
+  }
+}
