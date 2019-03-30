@@ -1,0 +1,39 @@
+#!/bin/sh
+
+#touch /run/openrc/softlevel
+#/etc/init.d/sshd start
+
+#  add a boot service to $sysroot
+rc_add() {
+	mkdir -p $sysroot/etc/runlevels/$2
+	ln -sf /etc/init.d/$1 $sysroot/etc/runlevels/$2/$1
+}
+
+#echo "copying random seed into urandom"
+#cat /etc/random-seed > /dev/urandom
+#cat /dev/urandom | base64 | head -c 100
+
+rc_add sshd default
+rc_add dhcpcd default
+rc_add urandom default
+rc_add rngd default
+
+#/sbin/openrc boot
+
+#export RNGD_OPTS="-r /dev/urandom"
+chown -R root:root /root
+
+# 9p-virtio
+mkdir /port
+mount -t 9p -o trans=virtio,version=9p2000.L port /port
+
+# load kernel modules
+if [ -f /etc/modules ] ; then
+	sed 's/\#.*//g' < /etc/modules |
+	while read module args; do
+		modprobe -q $module $args
+	done
+fi
+
+exec /sbin/init
+#exec /sbin/openrc-init
