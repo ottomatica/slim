@@ -2,7 +2,7 @@
 
 `slim` will build a micro-vm from a Dockerfile. Slim works by building and extracting a rootfs from a Dockerfile, and then merging that filesystem with a small minimal kernel that runs in RAM.
 
-This results in a real VM that can boot instantly, while using very limited resources. If done propertly, slim can allow you to design and build immutable unikernels for running services, or build tiny and embedded development environments.
+This results in a real VM that can boot instantly, while using very limited resources. If done properly, slim can allow you to design and build immutable unikernels for running services, or build tiny and embedded development environments.
 
 ## Using slim
 
@@ -15,7 +15,7 @@ Create a micro-vm from a Dockerfile. Use `build` command with a directory contai
 $ slim build images/alpine3.8-runc-ansible
 ```
 
-This will add a bootable iso in the slim registery. [See example Dockerfile](https://github.com/ottomatica/slim/tree/master/images/alpine3.8-runc-ansible).
+This will add a bootable iso in the slim registry. [See example Dockerfile](https://github.com/ottomatica/slim/tree/master/images/alpine3.8-runc-ansible).
 
 ### Listing micro-vm images
 
@@ -37,7 +37,7 @@ $ slim run micro1 alpine3.8-runc-ansible
 
 VirtualBox will run the micro-vm instance as an attached iso loaded into a cdrom, and boot up the iso in seconds.
 
-For convience, a ssh connection command is provided at the end of the command, allowing easy access into the machine:
+For convenience, a ssh connection command is provided at the end of the command, allowing easy access into the machine:
 Example: `ssh -i /Users/cjparnin/.slim/baker_rsa root@127.0.0.1 -p 2008 -o StrictHostKeyChecking=no`
 
 ## Installing slim
