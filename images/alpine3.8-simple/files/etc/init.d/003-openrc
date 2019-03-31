@@ -1,0 +1,9 @@
+#!/bin/sh
+
+#echo "setting up network stuff..."
+#ip addr add 10.0.1.15/16 dev eth0
+#ip link set eth0 up
+#route add default gw 10.0.1.2
+echo "switching openrc run-mode to default"
+/sbin/openrc default
+#/sbin/dhcpcd --nobackground -f /etc/mydhcpcd.conf
