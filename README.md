@@ -9,18 +9,33 @@ This results in a real VM that can boot instantly, while using very limited reso
 
 ### Build a microkernel
 
-`slim build images/alpine3.8-runc-ansible`: Create a microkernel from a Dockerfile. [See example Dockerfile](https://github.com/ottomatica/slim/tree/master/images/alpine3.8-runc-ansible). This will be stored as a bootable iso.
+Create a microkernel from a Dockerfile. Use `build` command with a directory containing a Dockerfile.
 
+```
+$ slim build images/alpine3.8-runc-ansible
+```
+
+[See example Dockerfile](https://github.com/ottomatica/slim/tree/master/images/alpine3.8-runc-ansible). This will add a bootable iso in the slim registery.
 
 ### Listing microkernels
 
-`slim images`: See a list of microkernels on your machine.
+See a list of microkernels on your machine.
+
+```
+$ slim images
+```
 
 ![images command](doc/img/images.png)
 
 ### Running a microkernel
 
-`slim run micro1 alpine3.8-runc-ansible`: Provision a new instance of the given microkernel as a VM in VirtualBox. VirtualBox will run the microkernel as an attached iso loaded into a cdrom, and boot up the iso in seconds.
+Provision a new instance of the given microkernel as a virtual machine.
+
+```
+$ slim run micro1 alpine3.8-runc-ansible
+```
+
+VirtualBox will run the microkernel as an attached iso loaded into a cdrom, and boot up the iso in seconds.
 
 For convience, a ssh connection command is provided at the end of the command, allowing easy access into the machine:
 Example: `ssh -i /Users/cjparnin/.slim/baker_rsa root@127.0.0.1 -p 2008 -o StrictHostKeyChecking=no`
