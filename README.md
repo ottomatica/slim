@@ -15,7 +15,7 @@ Create a microkernel from a Dockerfile. Use `build` command with a directory con
 $ slim build images/alpine3.8-runc-ansible
 ```
 
-[See example Dockerfile](https://github.com/ottomatica/slim/tree/master/images/alpine3.8-runc-ansible). This will add a bootable iso in the slim registery.
+This will add a bootable iso in the slim registery. [See example Dockerfile](https://github.com/ottomatica/slim/tree/master/images/alpine3.8-runc-ansible).
 
 ### Listing microkernels
 
