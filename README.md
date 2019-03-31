@@ -35,6 +35,8 @@ Provision a new instance of the given micro-vm image as a virtual machine.
 $ slim run micro1 alpine3.8-runc-ansible
 ```
 
+![nanobox](doc/img/nanobox.png)
+
 VirtualBox will run the micro-vm instance as an attached iso loaded into a cdrom, and boot up the iso in seconds.
 
 For convenience, a ssh connection command is provided at the end of the command, allowing easy access into the machine:
