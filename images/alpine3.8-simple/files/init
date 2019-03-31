@@ -24,8 +24,8 @@ rc_add rngd default
 chown -R root:root /root
 
 # 9p-virtio
-mkdir /port
-mount -t 9p -o trans=virtio,version=9p2000.L port /port
+#mkdir /port
+#mount -t 9p -o trans=virtio,version=9p2000.L port /port
 
 # load kernel modules
 if [ -f /etc/modules ] ; then

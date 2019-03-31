@@ -1,8 +1,0 @@
-#!/bin/sh
-
-echo "setting up vpnkit"
-# forward vpnkit incoming requests to right place.
-nohup /usr/bin/vpnkit-forwarder &
-
-# forward ssh port
-nohup /usr/bin/vpnkit-expose-port -proto tcp -host-ip 0.0.0.0 -host-port 6022 -container-ip 127.0.0.1 -container-port 22 -no-local-ip -i &
