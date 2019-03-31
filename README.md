@@ -6,11 +6,19 @@ This results in a real VM that can boot instantly, while using very limited reso
 
 ## Using slim
 
+
+### Build a microkernel
+
 `slim build images/alpine3.8-runc-ansible`: Create a microkernel from a Dockerfile. [See example Dockerfile](https://github.com/ottomatica/slim/tree/master/images/alpine3.8-runc-ansible). This will be stored as a bootable iso.
+
+
+### Listing microkernels
 
 `slim images`: See a list of microkernels on your machine.
 
 ![images command](doc/img/images.png)
+
+### Running a microkernel
 
 `slim run micro1 alpine3.8-runc-ansible`: Provision a new instance of the given microkernel as a VM in VirtualBox. VirtualBox will run the microkernel as an attached iso loaded into a cdrom, and boot up the iso in seconds.
 
