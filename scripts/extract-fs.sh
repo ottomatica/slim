@@ -1,6 +1,10 @@
 #!/bin/bash
 
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+# Use gnu-tar on mac
+# https://github.com/docker/for-mac/issues/1578
+# might need to use tar on Windows, too
+TAR_BIN="$([ "$(uname)" == "Linux" ] && echo "tar" || echo "gtar")"
 
 # Prepare and reset build directories
 WORKDIR=~/.slim
@@ -10,7 +14,7 @@ rm -rf alpine-tmp alpine-vm
 rm -rf file.img.gz file.img
 
 # terminate early if commands fail
-set -e 
+set -e
 set -o pipefail
 
 
@@ -28,9 +32,7 @@ mv alpine.tar alpine-tmp
 cd alpine-tmp && tar -xvf alpine.tar
 mv */layer.tar ../alpine-vm
 echo "extracting layer.tar"
-# Use gnu-tar
-# https://github.com/docker/for-mac/issues/1578
-cd ../alpine-vm && gtar -xf layer.tar
+cd ../alpine-vm && $TAR_BIN -xf layer.tar
 rm layer.tar
 
 #echo "copy randomness"

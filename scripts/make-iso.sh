@@ -17,12 +17,21 @@ chmod -R +w baker-mount
 rm -rf baker-mount
 
 # Mount base alpine iso
-DISK=$(hdiutil attach -nomount $ISO | head -n 1 | cut -f 1)
-echo "base image mounted on $DISK"
-
-FS_MOUNTOPTIONS="uid=1000,gid=1000" mount -t cd9660 $DISK alpine-iso
-cp -a alpine-iso/. baker-mount
-umount alpine-iso
+# Some duplicate code here; probably needs cleanup at some point
+if [ "$(uname)" == "Linux" ]; then
+    # Might be a better way to do this w/o sudo
+    DISK=$(sudo losetup -f --show $ISO)
+    echo "base image mounted on $DISK"
+    sudo FS_MOUNTOPTIONS="uid=1000,gid=1000" mount $DISK alpine-iso
+    cp -a alpine-iso/. baker-mount
+    sudo umount alpine-iso
+else
+    DISK=$(hdiutil attach -nomount $ISO | head -n 1 | cut -f 1)
+    echo "base image mounted on $DISK"
+    FS_MOUNTOPTIONS="uid=1000,gid=1000" mount -t cd9660 $DISK alpine-iso
+    cp -a alpine-iso/. baker-mount
+    umount alpine-iso
+fi
 
 # make items writable
 chmod +w baker-mount/boot/syslinux/isolinux.bin
