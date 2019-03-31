@@ -14,17 +14,24 @@ mkdir -p alpine-iso/ baker-mount
 
 # Some directories and files are not writeable, making harder to copy over/delete on multiple runs. Add write permission first.
 chmod -R +w baker-mount
-rm -rf baker-mount
+rm -rf baker-mount/*
 
 # Mount base alpine iso
 # Some duplicate code here; probably needs cleanup at some point
 if [ "$(uname)" == "Linux" ]; then
-    # Might be a better way to do this w/o sudo
-    DISK=$(sudo losetup -f --show $ISO)
+    # unfortunately the udisksctl commands return 'sentences', so we have to cut out the rest
+    # example: Mapped file /home/gjabell/.slim/registery/alpine3.8-runc-ansible/base.iso as /dev/loop0.
+    DISK=$(udisksctl loop-setup -r -f $ISO | grep -Po '/dev/loop\d+')
     echo "base image mounted on $DISK"
-    sudo FS_MOUNTOPTIONS="uid=1000,gid=1000" mount $DISK alpine-iso
-    cp -a alpine-iso/. baker-mount
-    sudo umount alpine-iso
+    # /dev/loopXp1 is the partition with the base system
+    PART=$DISK"p1"
+    # mounting returns the path used, typically /run/media/[username]/...
+    # example: Mounted /dev/loop0p1 at /run/media/gjabell/alpine-virt 3.8.0 x86_64.
+    # this regex attempts to cover any case, but might need some tweaking
+    MOUNT="$(udisksctl mount -b $PART | grep -Po "(?<=$PART at )/.+(?=\\.)")"
+    cp -a "$MOUNT"/. baker-mount
+    udisksctl unmount -b $PART
+    udisksctl loop-delete -b $DISK
 else
     DISK=$(hdiutil attach -nomount $ISO | head -n 1 | cut -f 1)
     echo "base image mounted on $DISK"
