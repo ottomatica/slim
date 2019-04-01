@@ -12,10 +12,10 @@ This results in a real VM that can boot instantly, while using very limited reso
 Create a micro-vm from a Dockerfile. Use `build` command with a directory containing a Dockerfile.
 
 ```
-$ slim build images/alpine3.8-runc-ansible
+$ slim build images/alpine3.8-simple
 ```
 
-This will add a bootable iso in the slim registry. [See example Dockerfile](https://github.com/ottomatica/slim/tree/master/images/alpine3.8-runc-ansible).
+This will add a bootable iso in the slim registry. [See example Dockerfile](https://github.com/ottomatica/slim/tree/master/images/alpine3.8-simple).
 
 ### Listing micro-vm images
 
@@ -32,7 +32,7 @@ $ slim images
 Provision a new instance of the given micro-vm image as a virtual machine.
 
 ```
-$ slim run micro1 alpine3.8-runc-ansible
+$ slim run micro1 alpine3.8-simple
 ```
 
 ![nanobox](doc/img/nanobox.png)
