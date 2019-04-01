@@ -27,6 +27,8 @@ chown -R root:root /root
 #mkdir /port
 #mount -t 9p -o trans=virtio,version=9p2000.L port /port
 
+echo "nanobox" > /etc/hostname
+
 # load kernel modules
 if [ -f /etc/modules ] ; then
 	sed 's/\#.*//g' < /etc/modules |
