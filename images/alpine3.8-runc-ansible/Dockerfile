@@ -10,11 +10,11 @@ RUN git clone https://github.com/moby/vpnkit.git /go/src/github.com/moby/vpnkit 
     cd go && \
     make build/vpnkit-iptables-wrapper.linux build/vpnkit-expose-port.linux build/vpnkit-forwarder.linux
 
-FROM alpine:latest AS build
+FROM alpine:3.8.4 AS build
 RUN mkdir -p /lib/apk/db /run
 RUN apk add --no-cache --initdb openrc
 
-FROM alpine:latest AS kernel
+FROM alpine:3.8.4 AS kernel
 RUN mkdir -p /lib/apk/db /run
 RUN echo "http://dl-cdn.alpinelinux.org/alpine/v3.8/main" >> /etc/apk/repositories
 RUN apk add --no-cache --initdb linux-virt
@@ -44,7 +44,7 @@ RUN cp runc /usr/bin/
 RUN mkdir -p /etc/init.d && ln -s /usr/bin/service /etc/init.d/010-onboot
 RUN mkdir -p /etc/shutdown.d && ln -s /usr/bin/service /etc/shutdown.d/010-onshutdown
 
-FROM alpine:latest AS install
+FROM alpine:3.8.4 AS install
 # the public key that is authorized to connect to this instance.
 ARG SSHPUBKEY
 
@@ -62,7 +62,7 @@ COPY --from=kernel /lib/modules /lib/modules
 RUN apk add --update --no-cache --initdb alpine-baselayout apk-tools busybox ca-certificates musl tini util-linux \
     openssh openssh-client rng-tools ansible \
     #bash iproute2 iptables ebtables ipvsadm bridge-utils \
-    dhcpcd virtualbox-guest-additions virtualbox-guest-modules-virt \
+    dhcpcd dhcpcd-openrc virtualbox-guest-additions virtualbox-guest-modules-virt \
     libseccomp e2fsprogs
     #openrc
 
@@ -77,6 +77,9 @@ COPY --from=build2 /go/src/github.com/moby/vpnkit/go/build/vpnkit-iptables-wrapp
 COPY --from=build2 /go/src/github.com/moby/vpnkit/go/build/vpnkit-expose-port.linux /usr/bin/vpnkit-expose-port
 COPY --from=build2 /go/src/github.com/moby/vpnkit/go/build/vpnkit-forwarder.linux /usr/bin/vpnkit-forwarder
 
+COPY --from=myrunc /usr/bin/runc /usr/bin/
+COPY --from=myrunc /etc/init.d/ /etc/init.d/
+COPY --from=myrunc /etc/shutdown.d/ /etc/shutdown.d/
 
 # don't want all the /etc stuff from openrc -- only tools
 # https://pkgs.alpinelinux.org/contents?repo=main&page=2&arch=x86_64&branch=v3.8&name=openrc
@@ -107,9 +110,10 @@ RUN mkdir -p /mnt/disk
 RUN mkdir -p /etc/ssh /root/.ssh && chmod 0700 /root/.ssh
 RUN echo $SSHPUBKEY > /root/.ssh/authorized_keys && chmod 600 /root/.ssh/authorized_keys
 
-COPY --from=myrunc /usr/bin/runc /usr/bin/
-COPY --from=myrunc /etc/init.d/ /etc/init.d/
-COPY --from=myrunc /etc/shutdown.d/ /etc/shutdown.d/
+
+
+# Fix ssh
+RUN sed -i 's/root:!/root:*/' /etc/shadow
 
 # Don't need floppy group
 RUN sed -i '/floppy:x:11:root/d' /etc/group
