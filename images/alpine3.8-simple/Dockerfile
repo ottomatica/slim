@@ -25,6 +25,14 @@ RUN echo "http://dl-cdn.alpinelinux.org/alpine/v3.8/community" >> /etc/apk/repos
 RUN mkdir -p /etc/init.d && ln -s /usr/bin/service /etc/init.d/010-onboot
 RUN mkdir -p /etc/shutdown.d && ln -s /usr/bin/service /etc/shutdown.d/010-onshutdown
 
+
+# don't want all the /etc stuff from openrc -- only tools
+# https://pkgs.alpinelinux.org/contents?repo=main&page=2&arch=x86_64&branch=v3.8&name=openrc
+COPY --from=build /lib/ /lib/
+COPY --from=build /bin /bin
+COPY --from=build /sbin /sbin
+COPY --from=build /etc/ /etc/
+
 # Need virtio modules for networking and host folder sharing.
 COPY --from=kernel /lib/modules /lib/modules
 
@@ -35,13 +43,6 @@ RUN rm -rf /var/cache/apk && mkdir -p /var/cache/apk
 
 # Deleted cached packages
 RUN rm -rf /var/cache/apk/* && mkdir -p /var/cache/apk
-
-# don't want all the /etc stuff from openrc -- only tools
-# https://pkgs.alpinelinux.org/contents?repo=main&page=2&arch=x86_64&branch=v3.8&name=openrc
-COPY --from=build /lib/ /lib/
-COPY --from=build /bin /bin
-COPY --from=build /sbin /sbin
-COPY --from=build /etc/ /etc/
 
 # Our local files
 COPY files/init /init
