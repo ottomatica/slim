@@ -1,14 +1,14 @@
 
-FROM alpine:latest AS build
+FROM alpine:3.8.4 AS build
 RUN mkdir -p /lib/apk/db /run
 RUN apk add --no-cache --initdb openrc
 
-FROM alpine:latest AS kernel
+FROM alpine:3.8.4 AS kernel
 RUN mkdir -p /lib/apk/db /run
-RUN echo "http://dl-cdn.alpinelinux.org/alpine/v3.8/main" >> /etc/apk/repositories
+RUN echo "http://dl-cdn.alpinelinux.org/alpine/v3.8/main" > /etc/apk/repositories
 RUN apk add --no-cache --initdb linux-virt
 
-FROM alpine:latest AS install
+FROM alpine:3.8.4 AS install
 # the public key that is authorized to connect to this instance.
 ARG SSHPUBKEY
 
@@ -53,6 +53,9 @@ COPY files/usr/ /usr/
 # For mounts
 RUN mkdir -p /data
 RUN mkdir -p /mnt/disk
+
+# Fix ssh
+RUN sed -i 's/root:!/root:*/' /etc/shadow
 
 # Don't need floppy group
 RUN sed -i '/floppy:x:11:root/d' /etc/group
