@@ -13,6 +13,7 @@ addons:
     packages:
       - vagrant
       - virtualbox
+      - udisks2
 node_js: 8 
 install: npm install && npm link
 script: slim build images/alpine3.8-simple && slim images
