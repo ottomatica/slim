@@ -8,6 +8,6 @@ addons:
     packages:
       - gnu-tar
       - cdrtools
-node_version= 8 
+node_js: 8 
 install: npm install && npm link
 script: slim build images/alpine3.8-simple && slim images
