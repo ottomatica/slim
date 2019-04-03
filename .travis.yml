@@ -1,0 +1,12 @@
+language: generic
+os: osx
+addons:
+  homebrew:
+    casks:
+      - docker
+      - vagrant
+    packages:
+      - gnu-tar
+      - cdrtools
+install: npm install && npm link
+script: slim build images/alpine3.8-simple && slim images
