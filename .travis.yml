@@ -1,4 +1,4 @@
-language: generic
+language: node_js
 os: osx
 addons:
   homebrew:
@@ -8,6 +8,6 @@ addons:
     packages:
       - gnu-tar
       - cdrtools
-install: nvm use 8 && npm install && npm link
-before_script: node --version
+node_version= 8 
+install: npm install && npm link
 script: slim build images/alpine3.8-simple && slim images
