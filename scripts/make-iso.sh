@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash set -e
 WORKDIR=~/.slim
 OUTPUT_PATH=$1
 ISO=$2
