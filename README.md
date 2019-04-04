@@ -55,5 +55,6 @@ Unfortunately, due to the experimental nature, there are a few dependencies you 
 
 * [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 * [docker](https://docs.docker.com/install/)
-* gtar: `brew install gnu-tar`
+* 7z: `brew install p7zip`
+* gtar: `brew install gnu-tar` (Mac only)
 * cdrtools: `brew install cdrtools`

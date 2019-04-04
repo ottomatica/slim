@@ -19,7 +19,7 @@ chmod -R +w baker-mount
 rm -rf baker-mount/*
 
 # copy base alpine iso
-7z x $ISO -obaker-mount
+7z x $ISO -obaker-mount -aoa
 
 # make items writable
 chmod +w baker-mount/boot/syslinux/isolinux.bin
