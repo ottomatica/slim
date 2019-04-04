@@ -16,5 +16,5 @@ addons:
       - virtualbox
       - udisks2
 node_js: 8 
-install: sudo -E npm install && sudo -E npm link
-script: sudo -E slim build images/alpine3.8-simple && sudo -E slim images
+install: npm install && npm link
+script: slim build images/alpine3.8-simple && slim images
