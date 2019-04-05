@@ -23,6 +23,7 @@ docker save alpine-vm-flat > alpine.tar
 docker stop $ID
 docker rm $ID
 
+# Extracted nested tar files to get filesystem in layer.tar
 mkdir -p alpine-tmp alpine-vm
 mv alpine.tar alpine-tmp
 cd alpine-tmp && node $SCRIPTPATH/../lib/util/tar.js alpine.tar .
@@ -34,9 +35,5 @@ rm layer.tar
 #echo "copy randomness"
 #cat /dev/urandom | head -c 5000 > etc/random-seed || echo $?
 
-echo "creating file.img"
-find . | cpio -o -H newc > $WORKDIR/file.img;
-cd $WORKDIR
-echo "compressing img"
-gzip file.img
-#cp file.img.gz $SCRIPTPATH/file.img.gz
+echo "creating file.img.gz"
+find . | cpio -o -H newc -z  -O $WORKDIR/file.img.gz;
