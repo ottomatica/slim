@@ -1,10 +1,6 @@
 #!/bin/bash
 
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
-# Use gnu-tar on mac
-# https://github.com/docker/for-mac/issues/1578
-# might need to use tar on Windows, too
-TAR_BIN="$([ "$(uname)" == "Linux" ] && echo "tar" || echo "gtar")"
 
 # Prepare and reset build directories
 WORKDIR=~/.slim
@@ -29,10 +25,10 @@ docker rm $ID
 
 mkdir -p alpine-tmp alpine-vm
 mv alpine.tar alpine-tmp
-cd alpine-tmp && tar -xvf alpine.tar
+cd alpine-tmp && node $SCRIPTPATH/../lib/util/tar.js alpine.tar .
 mv */layer.tar ../alpine-vm
 echo "extracting layer.tar"
-cd ../alpine-vm && $TAR_BIN -xf layer.tar
+cd ../alpine-vm && node $SCRIPTPATH/../lib/util/tar.js layer.tar .
 rm layer.tar
 
 #echo "copy randomness"
