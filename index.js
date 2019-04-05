@@ -61,8 +61,9 @@ const Images= require('./lib/images');
         {
             fs.mkdirSync(path.dirname(outputPath));
         }
-        child.execSync(`scripts/extract-fs.sh ${buildPath}`, {stdio: 'inherit'});
-        child.execSync(`scripts/make-iso.sh ${outputPath} ${baseIso}`, {stdio: 'inherit'})
+        let slimDir = __dirname;
+        child.execSync(`${slimDir}/scripts/extract-fs.sh ${buildPath}`, {stdio: 'inherit'});
+        child.execSync(`${slimDir}/scripts/make-iso.sh ${outputPath} ${baseIso}`, {stdio: 'inherit'})
 
         // Copy over to output directory
         fs.copyFileSync(infoPath, path.join(path.dirname(outputPath),'info.yml'));
