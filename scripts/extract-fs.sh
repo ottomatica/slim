@@ -35,5 +35,8 @@ rm layer.tar
 #echo "copy randomness"
 #cat /dev/urandom | head -c 5000 > etc/random-seed || echo $?
 
-echo "creating file.img.gz"
-find . | cpio -o -H newc -z  -O $WORKDIR/file.img.gz;
+echo "creating file.img"
+find . | cpio -o -H newc -z  -O $WORKDIR/file.img;
+echo "compressing image"
+cd $WORKDIR && gzip file.img
+
