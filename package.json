@@ -26,10 +26,8 @@
   "dependencies": {
     "chalk": "^2.4.2",
     "download": "^7.1.0",
-    "install": "^0.12.2",
     "js-yaml": "^3.13.0",
     "node-virtualbox": "^0.1.36",
-    "npm": "^6.9.0",
     "progress": "^2.0.3",
     "tar": "^4.4.8"
   }
