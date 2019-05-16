@@ -1,7 +1,7 @@
 FROM linuxkit/alpine:daed76b8f1d28cdeeee215a95b9671c682a405dc AS build2
 
 RUN apk add --no-cache go musl-dev git build-base
-ENV GOPATH=/go PATH=$PATH:/go/bin 
+ENV GOPATH=/go PATH=$PATH:/go/bin
 ENV COMMIT=db7b7b0f8147f29360d69dc81af9e2877647f0de
 
 RUN git clone https://github.com/moby/vpnkit.git /go/src/github.com/moby/vpnkit && \
@@ -48,7 +48,7 @@ FROM alpine:3.8.4 AS install
 # the public key that is authorized to connect to this instance.
 ARG SSHPUBKEY
 
-USER root 
+USER root
 RUN mkdir -p /lib/apk/db /run
 
 RUN rm -rf /var/cache/apk && mkdir /var/cache/apk
@@ -58,6 +58,9 @@ RUN echo "http://dl-cdn.alpinelinux.org/alpine/v3.8/community" >> /etc/apk/repos
 #COPY --from=kernel /lib/modules/4.14.52-0-virt/kernel/drivers/virtio/virtio.ko /lib/modules/4.14.52-0-virt/kernel/drivers/virtio/virtio.ko
 #COPY --from=kernel /lib/modules/4.14.52-0-virt/kernel/drivers/net/virtio_net.ko /lib/modules/4.14.52-0-virt/kernel/drivers/net/virtio_net.ko
 COPY --from=kernel /lib/modules /lib/modules
+
+# Copy kernel for later use
+COPY --from=kernel /boot/vmlinuz-virt /vmlinuz
 
 RUN apk add --update --no-cache --initdb alpine-baselayout apk-tools busybox ca-certificates musl tini util-linux \
     openssh openssh-client rng-tools ansible \
@@ -93,7 +96,7 @@ COPY --from=build /etc/ /etc/
 RUN rm -rf /var/cache/apk/* && mkdir -p /var/cache/apk
 
 # remove some config relying on openrc
-#RUN rm -rf /etc/init.d/dhcpcd 
+#RUN rm -rf /etc/init.d/dhcpcd
 # /etc/init.d/sshd
 
 COPY files/init /init

@@ -12,7 +12,7 @@ FROM alpine:3.8.4 AS install
 # the public key that is authorized to connect to this instance.
 ARG SSHPUBKEY
 
-USER root 
+USER root
 # Set an ssh key
 RUN mkdir -p /etc/ssh /root/.ssh && chmod 0700 /root/.ssh
 RUN echo $SSHPUBKEY > /root/.ssh/authorized_keys && chmod 600 /root/.ssh/authorized_keys
@@ -35,6 +35,9 @@ COPY --from=build /etc/ /etc/
 
 # Need virtio modules for networking and host folder sharing.
 COPY --from=kernel /lib/modules /lib/modules
+
+# Copy kernel for later use
+COPY --from=kernel /boot/vmlinuz-virt /vmlinuz
 
 RUN apk add --update --no-cache --initdb alpine-baselayout apk-tools busybox ca-certificates util-linux \
     openssh openssh-client rng-tools dhcpcd

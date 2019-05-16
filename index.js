@@ -54,8 +54,6 @@ const Images= require('./lib/images');
 
         // Fetch required base images
         let info = await yaml.safeLoad(fs.readFileSync(infoPath));
-        let iso = info.base_url;
-        await env.fetch(iso, path.dirname(outputPath), 'base.iso');
 
         if( !fs.existsSync( path.dirname(outputPath)) )
         {

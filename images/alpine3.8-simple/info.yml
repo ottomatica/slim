@@ -1,2 +1,1 @@
-base_url: http://dl-3.alpinelinux.org/alpine/v3.8/releases/x86_64/alpine-virt-3.8.4-x86_64.iso
 description: A basic alpine server with ssh.

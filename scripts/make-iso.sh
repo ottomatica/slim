@@ -1,4 +1,7 @@
 #!/bin/bash
+
+SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+
 # exit on error
 set -e
 WORKDIR=~/.slim
@@ -11,26 +14,23 @@ echo $OUTPUT_PATH $ISO
 mkdir -p $WORKDIR
 cd $WORKDIR
 
-mkdir -p alpine-iso/ baker-mount
+mkdir -p slim-iso/{boot,isolinux}
 
-
-# Some directories and files are not writeable, making harder to copy over/delete on multiple runs. Add write permission first.
-chmod -R +w baker-mount
-rm -rf baker-mount/*
-
-# copy base alpine iso
-7z x $ISO -obaker-mount -aoa
-
-# make items writable
-chmod +w baker-mount/boot/syslinux/isolinux.bin
-chmod +w baker-mount/boot/initramfs-virt
-chmod +w baker-mount/boot/vmlinuz-virt
-
-# update
-cp file.img.gz baker-mount/boot/initramfs-virt
+# copy our custom initramfs, the kernel extracted earlier, and our isolinux files
+cp initrd.img.gz slim-iso/boot/initrd
+cp $WORKDIR/vmlinuz slim-iso/boot/vmlinuz
+cp $SCRIPTPATH/syslinux/* slim-iso/isolinux/
 
 # Needs `brew install cdrtools`
-mkisofs -b boot/syslinux/isolinux.bin -c boot/syslinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table   -V slim -o $OUTPUT_PATH -J -R baker-mount/
+# See https://wiki.syslinux.org/wiki/index.php?title=ISOLINUX#How_Can_I_Make_a_Bootable_CD_With_ISOLINUX.3F
+mkisofs -o $OUTPUT_PATH \
+        -b isolinux/isolinux.bin \
+        -c isolinux/boot.cat \
+        -no-emul-boot \
+        -boot-load-size 4 \
+        -boot-info-table \
+        -V slim -J -R \
+        slim-iso/
 
 echo
 echo "Created microkernel."
