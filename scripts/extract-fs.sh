@@ -6,8 +6,8 @@ SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 WORKDIR=~/.slim
 mkdir -p $WORKDIR
 cd $WORKDIR
-rm -rf alpine-tmp alpine-vm
-rm -rf file.img.gz file.img
+rm -rf slim-tmp slim-vm
+rm -rf initrd.img.gz initrd.img
 
 # terminate early if commands fail
 set -e
@@ -15,28 +15,30 @@ set -o pipefail
 
 
 # Use docker to build image
-docker build --no-cache -t alpine-vm --build-arg SSHPUBKEY="$(cat $SCRIPTPATH/keys/baker.pub)" $1
+docker build --no-cache -t slim-vm --build-arg SSHPUBKEY="$(cat $SCRIPTPATH/keys/baker.pub)" $1
 # Run a container and use export/import to flatten layers
-ID=$(docker run -it -d alpine-vm sh)
-docker export $ID | docker import - alpine-vm-flat
-docker save alpine-vm-flat > alpine.tar
+ID=$(docker run -it -d slim-vm sh)
+docker export $ID | docker import - slim-vm-flat
+docker save slim-vm-flat > slim.tar
 docker stop $ID
 docker rm $ID
 
 # Extracted nested tar files to get filesystem in layer.tar
-mkdir -p alpine-tmp alpine-vm
-mv alpine.tar alpine-tmp
-cd alpine-tmp && node $SCRIPTPATH/../lib/util/tar.js alpine.tar .
-mv */layer.tar ../alpine-vm
+mkdir -p slim-tmp slim-vm
+mv slim.tar slim-tmp
+cd slim-tmp && node $SCRIPTPATH/../lib/util/tar.js slim.tar .
+mv */layer.tar ../slim-vm
 echo "extracting layer.tar"
-cd ../alpine-vm && node $SCRIPTPATH/../lib/util/tar.js layer.tar .
+cd ../slim-vm && node $SCRIPTPATH/../lib/util/tar.js layer.tar .
 rm layer.tar
 
 #echo "copy randomness"
 #cat /dev/urandom | head -c 5000 > etc/random-seed || echo $?
 
-echo "creating file.img"
-find . | cpio -o -H newc -O $WORKDIR/file.img;
-echo "compressing image"
-cd $WORKDIR && gzip file.img
+# extract kernel
+mv vmlinuz $WORKDIR
 
+echo "creating initrd.img"
+find . | cpio -o -H newc -O $WORKDIR/initrd.img;
+echo "compressing image"
+cd $WORKDIR && gzip initrd.img
