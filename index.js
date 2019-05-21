@@ -1,6 +1,6 @@
 #! /usr/bin/env node
 const path  = require('path');
-const fs    = require('fs');
+const fs    = require('fs-extra');
 const yargs = require('yargs');
 const chalk = require('chalk');
 const child = require('child_process');
@@ -32,7 +32,7 @@ const Images= require('./lib/images');
         }
 
         else {
-            console.error(`Image ${argv.image} not found.`);
+            console.error(`${argv.image} image not found.`);
             process.exit(1);
         }
     });
@@ -48,12 +48,20 @@ const Images= require('./lib/images');
     });
 
     yargs.command('delete <vm|image> <name>', 'Delete a micro kernel image or vm', (yargs) => { }, async (argv) => {
-        if (argv.vm) {
+        if (argv.vm === 'vm') {
             let micro = new Micro();
             const name = argv.name;
             if (name) await micro.delete(name);
-        } else if (argv.image) {
-            // TODO
+        } else if (argv.image === 'image') {
+            const images = new Images();
+
+            if (await images.exists(argv.name, registery)) {
+                await fs.remove(path.resolve(registery, argv.name));
+            }
+
+            else {
+                console.error(`${argv.name} image not found.`);
+            }
         }
     });
 
