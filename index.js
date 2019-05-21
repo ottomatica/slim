@@ -25,7 +25,16 @@ const Images= require('./lib/images');
     // Create VM
     yargs.command('run <name> <image>', 'Provision a new micro kernel', (yargs) => { }, async (argv) => {
         let micro = new Micro();
-        await micro.create(argv.name, registery, {attach_iso:argv.image}).catch( e => console.log(e));
+        const images = (await (new Images()).list(registery)).map(image => image.image)
+        
+        if (images.includes(argv.image)) {
+            await micro.create(argv.name, registery, { attach_iso: argv.image }).catch(e => console.log(e));
+        }
+
+        else {
+            console.error(`Image ${argv.image} not found.`);
+            process.exit(1);
+        }
     });
 
     // Images
