@@ -38,6 +38,16 @@ const Images= require('./lib/images');
         console.table(transformed);
     });
 
+    yargs.command('delete <vm|image> <name>', 'Delete a micro kernel image or vm', (yargs) => { }, async (argv) => {
+        if (argv.vm) {
+            let micro = new Micro();
+            const name = argv.name;
+            if (name) await micro.delete(name);
+        } else if (argv.image) {
+            // TODO
+        }
+    });
+
     yargs.command('build [path]', 'Build a new micro kernel', (yargs) => { }, async (argv) => {
 
         let buildPath = argv.path || path.join(__dirname,'images/alpine3.8-runc-ansible');
