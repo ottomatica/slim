@@ -70,31 +70,37 @@ const Images= require('./lib/images');
 
     yargs.command('build [path]', 'Build a new micro kernel', (yargs) => { }, async (argv) => {
 
-        let buildPath = argv.path || path.join(__dirname,'images/alpine3.8-runc-ansible');
-        buildPath = path.resolve(buildPath);
+        let baseDir = __dirname;
 
-        let name = path.basename(buildPath);
+        let imagePath = path.join(baseDir, argv.path || path.join('images', 'alpine3.8-runc-ansible'));
+        imagePath = path.resolve(imagePath);
+
+        let name = path.basename(imagePath);
         let outputPath = path.join(registery, name, 'slim.iso');
-        let baseIso = path.join(registery, name, 'base.iso');
-        let infoPath = path.join(buildPath, 'info.yml');
+        let infoPath = path.join(imagePath, 'info.yml');
 
-        if( !fs.existsSync(buildPath)) { console.log(`path does not exist: ${buildPath}`); return; }
-        if( !fs.existsSync(path.join(buildPath, 'Dockerfile'))) { console.log(`Expected Dockerfile does not in this path: ${buildPath}`); return; }
         if( !fs.existsSync(infoPath)) { console.log(`Expected required configuration file missing: ${infoPath}`); return; }
 
         // Fetch required base images
-        let info = await yaml.safeLoad(fs.readFileSync(infoPath));
         let cache = argv.cache;
+        let pubkey = fs.readFileSync(path.join(baseDir, 'scripts', 'keys', 'baker.pub'));
 
-        let dockerOpts = `--no-cache=${!cache}`;
+        let dockerOpts = `--no-cache=${!cache} --build-arg SSHPUBKEY="${pubkey}"`;
 
         if( !fs.existsSync( path.dirname(outputPath)) )
         {
             fs.mkdirSync(path.dirname(outputPath));
         }
-        let slimDir = __dirname;
-        child.execSync(`${slimDir}/scripts/extract-fs.sh ${buildPath} ${dockerOpts}`, {stdio: 'inherit'});
-        child.execSync(`${slimDir}/scripts/make-iso.sh ${outputPath} ${baseIso}`, {stdio: 'inherit'})
+
+        try {
+            await dockerBuild(name, dockerOpts);
+        } catch (e) {
+            console.log(`failed to build docker image: ${e}`);
+            return;
+        }
+
+        child.execSync(`${baseDir}/scripts/extract-fs.sh ${name}`, {stdio: 'inherit'});
+        child.execSync(`${baseDir}/scripts/make-iso.sh ${outputPath} ${name}`, {stdio: 'inherit'})
 
         // Copy over to output directory
         fs.copyFileSync(infoPath, path.join(path.dirname(outputPath),'info.yml'));
@@ -111,5 +117,21 @@ const Images= require('./lib/images');
 
 })();
 
+async function dockerBuild(name, args) {
+    let imagePath = path.join(__dirname, 'images', name);
+    let infoPath = path.join(imagePath, 'info.yml');
+    let dockerfilePath = path.join(imagePath, 'Dockerfile');
 
+    if (!fs.existsSync(imagePath)) { throw new Error(`path does not exist: ${imagePath}`); }
+    if (!fs.existsSync(dockerfilePath)) { throw new Error(`expected Dockerfile missing: ${imagePath}`); }
+    if (!fs.existsSync(infoPath)) { throw new Error(`expected configuration file missing: ${infoPath}`); }
 
+    let info = await yaml.safeLoad(fs.readFileSync(infoPath));
+    let dockerDepends = info.depends;
+
+    // recursively build dependency images
+    if (dockerDepends) { await dockerBuild(dockerDepends, args); }
+
+    console.log(`building image for ${name}`);
+    child.execSync(`docker build ${args} -t ${name} ${imagePath}`, { stdio: 'inherit' });
+}
