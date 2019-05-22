@@ -28,13 +28,16 @@ const Images= require('./lib/images');
         const images = new Images();
 
         if (await images.exists(argv.image, registery)) {
-            await micro.create(argv.name, registery, { attach_iso: argv.image }).catch(e => console.log(e));
+            await micro.create(argv.name, registery, { attach_iso: argv.image, mem: argv.memory }).catch(e => console.log(e));
         }
 
         else {
             console.error(`${argv.image} image not found.`);
             process.exit(1);
         }
+    }).option('memory', {
+        alias: 'm',
+        describe: 'Choose memory size (MB)'
     });
 
     // Images
