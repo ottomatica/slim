@@ -68,17 +68,20 @@ const Images= require('./lib/images');
         }
     });
 
-    yargs.command('build [path]', 'Build a new micro kernel', (yargs) => { }, async (argv) => {
+    yargs.command('build [name]', 'Build a new micro kernel', (yargs) => { }, async (argv) => {
 
         let baseDir = __dirname;
 
-        let imagePath = path.join(baseDir, argv.path || path.join('images', 'alpine3.8-runc-ansible'));
-        imagePath = path.resolve(imagePath);
+        // default to alpine3.8-base
+        let name = argv.name || 'alpine3.8-base';
+        // if user's don't specify their own image path, use `slim dir`/images
+        let imageBase = argv.images || path.join(baseDir, 'images');
 
-        let name = path.basename(imagePath);
+        let imagePath = path.join(imageBase, name);
         let outputPath = path.join(registery, name, 'slim.iso');
         let infoPath = path.join(imagePath, 'info.yml');
 
+        if( !fs.existsSync(imagePath) ) { console.log(`Image ${name} does not exist`); return; }
         if( !fs.existsSync(infoPath)) { console.log(`Expected required configuration file missing: ${infoPath}`); return; }
 
         // Fetch required base images
@@ -93,7 +96,7 @@ const Images= require('./lib/images');
         }
 
         try {
-            await dockerBuild(name, dockerOpts);
+            await dockerBuild(imageBase, name, dockerOpts);
         } catch (e) {
             console.log(`failed to build docker image: ${e}`);
             return;
@@ -110,6 +113,10 @@ const Images= require('./lib/images');
         boolean: true,
         default: true,
         description: 'whether to cache images during docker build'
+    })
+    .option('images', {
+        alias: 'i',
+        description: 'specify a path to the image store'
     });
 
     // Turn on help and access argv
@@ -117,8 +124,8 @@ const Images= require('./lib/images');
 
 })();
 
-async function dockerBuild(name, args) {
-    let imagePath = path.join(__dirname, 'images', name);
+async function dockerBuild(imageBase, name, args) {
+    let imagePath = path.join(imageBase, name);
     let infoPath = path.join(imagePath, 'info.yml');
     let dockerfilePath = path.join(imagePath, 'Dockerfile');
 
@@ -130,7 +137,7 @@ async function dockerBuild(name, args) {
     let dockerDepends = info.depends;
 
     // recursively build dependency images
-    if (dockerDepends) { await dockerBuild(dockerDepends, args); }
+    if (dockerDepends) { await dockerBuild(imageBase, dockerDepends, args); }
 
     console.log(`building image for ${name}`);
     child.execSync(`docker build ${args} -t ${name} ${imagePath}`, { stdio: 'inherit' });
