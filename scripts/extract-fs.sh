@@ -1,6 +1,11 @@
 #!/bin/bash
 
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+DOCKERFILE_PATH="$1"
+
+# pass the rest of the args to docker
+shift
+DOCKER_OPTS="$@"
 
 # Prepare and reset build directories
 WORKDIR=~/.slim
@@ -13,9 +18,10 @@ rm -rf initrd.img.gz initrd.img
 set -e
 set -o pipefail
 
+echo "using docker opts $DOCKER_OPTS"
 
 # Use docker to build image
-docker build --no-cache -t slim-vm --build-arg SSHPUBKEY="$(cat $SCRIPTPATH/keys/baker.pub)" $1
+docker build "$@" -t slim-vm --build-arg SSHPUBKEY="$(cat $SCRIPTPATH/keys/baker.pub)" $DOCKERFILE_PATH
 # Run a container and use export/import to flatten layers
 ID=$(docker run -it -d slim-vm sh)
 docker export $ID | docker import - slim-vm-flat

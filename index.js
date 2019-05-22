@@ -94,20 +94,27 @@ const Images= require('./lib/images');
 
         // Fetch required base images
         let info = await yaml.safeLoad(fs.readFileSync(infoPath));
+        let cache = argv.cache;
+
+        let dockerOpts = `--no-cache=${!cache}`;
 
         if( !fs.existsSync( path.dirname(outputPath)) )
         {
             fs.mkdirSync(path.dirname(outputPath));
         }
         let slimDir = __dirname;
-        child.execSync(`${slimDir}/scripts/extract-fs.sh ${buildPath}`, {stdio: 'inherit'});
+        child.execSync(`${slimDir}/scripts/extract-fs.sh ${buildPath} ${dockerOpts}`, {stdio: 'inherit'});
         child.execSync(`${slimDir}/scripts/make-iso.sh ${outputPath} ${baseIso}`, {stdio: 'inherit'})
 
         // Copy over to output directory
         fs.copyFileSync(infoPath, path.join(path.dirname(outputPath),'info.yml'));
 
+    })
+    .option('cache', {
+        boolean: true,
+        default: true,
+        description: 'whether to cache images during docker build'
     });
-
 
     // Turn on help and access argv
     yargs.help().argv;
