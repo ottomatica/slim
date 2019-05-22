@@ -24,11 +24,18 @@ const Images= require('./lib/images');
 
     // Create VM
     yargs.command('run <name> <image>', 'Provision a new micro kernel', (yargs) => { }, async (argv) => {
+        let image = argv.image;
+
         let micro = new Micro();
         const images = new Images();
 
-        if (await images.exists(argv.image, registery)) {
-            await micro.create(argv.name, registery, { attach_iso: argv.image, mem: argv.memory }).catch(e => console.log(e));
+        if (await images.exists(image, registery)) {
+            let info = await images.info(image, registery).catch(e => console.log(e));
+
+            let cpus = argv.cpus || info.cpus;
+            let memory = argv.memory || info.memory;
+
+            await micro.create(argv.name, registery, { attach_iso: image, cpus: cpus, mem: memory }).catch(e => console.log(e));
         }
 
         else {
@@ -38,6 +45,9 @@ const Images= require('./lib/images');
     }).option('memory', {
         alias: 'm',
         describe: 'Choose memory size (MB)'
+    }).option('cpus', {
+        alias: 'c',
+        describe: 'number of cpus (default 1)'
     });
 
     // Images
@@ -103,6 +113,3 @@ const Images= require('./lib/images');
     yargs.help().argv;
 
 })();
-
-
-
