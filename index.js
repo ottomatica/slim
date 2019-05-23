@@ -1,20 +1,39 @@
 #! /usr/bin/env node
-const path  = require('path');
-const fs    = require('fs-extra');
-const yargs = require('yargs');
-const chalk = require('chalk');
-const child = require('child_process');
-const yaml  = require('js-yaml');
+const path   = require('path');
+const fs     = require('fs-extra');
+const yargs  = require('yargs');
+const chalk  = require('chalk');
+const child  = require('child_process');
+const yaml   = require('js-yaml');
+const tar    = require('tar');
+const os     = require('os');
 
-const Micro = require('./lib/micro');
-const Env   = require('./lib/env');
-const Images= require('./lib/images');
+const Docker = require('dockerode');
+const Micro  = require('./lib/micro');
+const Env    = require('./lib/env');
+const Images = require('./lib/images');
 
 // Environment reset/sanity check
 // - prereqs
 // - permissions
 // - required files
 
+const docker = new Docker();
+
+const error = e => console.error(chalk.red(e));
+const warning = m => console.log(chalk.orange(m));
+const info = m => console.log(chalk.yellow(m));
+const ok = m => console.log(chalk.green(m));
+
+// directories
+const syslinux = `${__dirname}/scripts/syslinux`;
+const workdir = `${os.homedir()}/.slim`;
+const slimvm = `${workdir}/slim-vm`;
+const slimiso = `${workdir}/slim-iso`;
+const boot = `${slimiso}/boot`;
+const isolinux = `${slimiso}/isolinux`;
+const initrd = `${boot}/initrd`;
+const vmlinuz = `${boot}/vmlinuz`;
 
 (async () => {
 
@@ -30,16 +49,16 @@ const Images= require('./lib/images');
         const images = new Images();
 
         if (await images.exists(image, registery)) {
-            let info = await images.info(image, registery).catch(e => console.log(e));
+            let info = await images.info(image, registery).catch(e => log(e));
 
             let cpus = argv.cpus || info.cpus;
             let memory = argv.memory || info.memory;
 
-            await micro.create(argv.name, registery, { attach_iso: image, cpus: cpus, mem: memory }).catch(e => console.log(e));
+            await micro.create(argv.name, registery, { attach_iso: image, cpus: cpus, mem: memory }).catch(e => log(e));
         }
 
         else {
-            console.error(`${argv.image} image not found.`);
+            error(`${argv.image} image not found.`);
             process.exit(1);
         }
     }).option('memory', {
@@ -73,7 +92,7 @@ const Images= require('./lib/images');
             }
 
             else {
-                console.error(`${argv.name} image not found.`);
+                error(`${argv.name} image not found.`);
             }
         }
     });
@@ -88,7 +107,7 @@ const Images= require('./lib/images');
         let infoPath = path.join(buildPath, 'info.yml');
 
 
-        if( !fs.existsSync(infoPath)) { console.log(`Expected required configuration file missing: ${infoPath}`); return; }
+        if( !fs.existsSync(infoPath)) { error(`Expected required configuration file missing: ${infoPath}`); return; }
 
         let info = await yaml.safeLoad(fs.readFileSync(infoPath));
         let pkgs = "";
@@ -110,20 +129,23 @@ const Images= require('./lib/images');
         // Will build base on provided Dockerfile in $buildPath
         else
         {
-            if( !fs.existsSync(buildPath)) { console.log(`path does not exist: ${buildPath}`); return; }
-            if( !fs.existsSync(path.join(buildPath, 'Dockerfile'))) { console.log(`Expected Dockerfile does not in this path: ${buildPath}`); return; }
+            if( !fs.existsSync(buildPath)) { error(`path does not exist: ${buildPath}`); return; }
+            if( !fs.existsSync(path.join(buildPath, 'Dockerfile'))) { error(`Expected Dockerfile does not in this path: ${buildPath}`); return; }
         }
-  
-        let cache = argv.cache;
-        let dockerOpts = `--no-cache=${!cache}`;
 
-        if( !fs.existsSync( path.dirname(outputPath)) )
-        {
-            fs.mkdirSync(path.dirname(outputPath));
+        let pubkey = fs.readFileSync(path.join(__dirname, 'scripts', 'keys', 'baker.pub')).toString();
+
+        let dockerOpts = {
+            nocache: !argv.cache,
+            buildargs: {
+                'SSHPUBKEY': pubkey,
+                'PKGS': pkgs
+            }
         }
-        let slimDir = __dirname;
-        child.execSync(`${slimDir}/scripts/extract-fs.sh ${buildPath} "${pkgs}" ${dockerOpts}`, {stdio: 'inherit'});
-        child.execSync(`${slimDir}/scripts/make-iso.sh ${outputPath}`, {stdio: 'inherit'})
+
+        fs.ensureDirSync(path.dirname(outputPath));
+
+        await buildVM(buildPath, outputPath, dockerOpts);
 
         // Copy over to output directory
         fs.copyFileSync(infoPath, path.join(path.dirname(outputPath),'info.yml'));
@@ -139,3 +161,57 @@ const Images= require('./lib/images');
     yargs.help().argv;
 
 })();
+
+async function buildVM(dockerfilePath, outputPath, dockerOpts) {
+    await Promise.all([
+        fs.ensureDir(workdir),
+        fs.emptyDir(slimvm),
+        fs.emptyDir(slimiso),
+        fs.emptyDir(boot)
+    ]);
+
+    await fs.copy(`${syslinux}`, `${isolinux}`);
+
+    info('building docker image');
+    const image = await docker.buildImage({ context: dockerfilePath }, {
+        t: 'slim-vm',
+        ...dockerOpts
+    });
+    await new Promise((resolve, reject) => {
+        docker.modem.followProgress(
+            image,
+            (err, res) => err ? reject(err) : resolve(res),
+            ev => process.stdout.write(ev.stream)
+        );
+    });
+
+    info('exporting docker filesystem');
+    const container = await docker.createContainer({ Image: 'slim-vm', Cmd: ['sh'] });
+
+    const contents = await container.export();
+    await new Promise((resolve, reject) => {
+        contents.pipe(
+            tar.x({ C: slimvm })
+               .on('close', resolve)
+               .on('error', err => reject(err))
+        );
+    });
+    container.remove().catch(e => undefined);
+
+    // move kernel
+    await fs.move(`${slimvm}/vmlinuz`, vmlinuz);
+
+    info('creating initrd');
+    child.execSync(`find . | cpio -o -H newc | gzip > ${initrd}`, { cwd: slimvm });
+
+    info('creating microkernel');
+    child.execSync(`
+        mkisofs -o ${outputPath} \
+        -b isolinux/isolinux.bin \
+        -c isolinux/boot.cat \
+        -no-emul-boot -boot-load-size 4 -boot-info-table \
+        -V slim -J -R ${slimiso}`,
+        {stdio: 'inherit'});
+
+    ok('success!');
+}
