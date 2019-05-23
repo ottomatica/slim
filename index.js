@@ -85,17 +85,36 @@ const Images= require('./lib/images');
 
         let name = path.basename(buildPath);
         let outputPath = path.join(registery, name, 'slim.iso');
-        let baseIso = path.join(registery, name, 'base.iso');
         let infoPath = path.join(buildPath, 'info.yml');
 
-        if( !fs.existsSync(buildPath)) { console.log(`path does not exist: ${buildPath}`); return; }
-        if( !fs.existsSync(path.join(buildPath, 'Dockerfile'))) { console.log(`Expected Dockerfile does not in this path: ${buildPath}`); return; }
+
         if( !fs.existsSync(infoPath)) { console.log(`Expected required configuration file missing: ${infoPath}`); return; }
 
-        // Fetch required base images
         let info = await yaml.safeLoad(fs.readFileSync(infoPath));
+        let pkgs = "";
+        // Fetch required base images (overwrites buildPath)
+        if( info.base_repository )
+        {
+            let baseRepoPath = await env.cloneOrPull(info.base_repository);
+            if( info.base_directory)
+            {
+                let baseDir = path.join(baseRepoPath, info.base_directory);
+                // We will build based on base repository contents.
+                buildPath = baseDir
+                if( info.base_args )
+                {
+                    pkgs = info.base_args.PKGS;
+                }
+            }
+        }
+        // Will build base on provided Dockerfile in $buildPath
+        else
+        {
+            if( !fs.existsSync(buildPath)) { console.log(`path does not exist: ${buildPath}`); return; }
+            if( !fs.existsSync(path.join(buildPath, 'Dockerfile'))) { console.log(`Expected Dockerfile does not in this path: ${buildPath}`); return; }
+        }
+  
         let cache = argv.cache;
-
         let dockerOpts = `--no-cache=${!cache}`;
 
         if( !fs.existsSync( path.dirname(outputPath)) )
@@ -103,8 +122,8 @@ const Images= require('./lib/images');
             fs.mkdirSync(path.dirname(outputPath));
         }
         let slimDir = __dirname;
-        child.execSync(`${slimDir}/scripts/extract-fs.sh ${buildPath} ${dockerOpts}`, {stdio: 'inherit'});
-        child.execSync(`${slimDir}/scripts/make-iso.sh ${outputPath} ${baseIso}`, {stdio: 'inherit'})
+        child.execSync(`${slimDir}/scripts/extract-fs.sh ${buildPath} ${pkgs} ${dockerOpts}`, {stdio: 'inherit'});
+        child.execSync(`${slimDir}/scripts/make-iso.sh ${outputPath}`, {stdio: 'inherit'})
 
         // Copy over to output directory
         fs.copyFileSync(infoPath, path.join(path.dirname(outputPath),'info.yml'));

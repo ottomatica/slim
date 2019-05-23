@@ -6,9 +6,8 @@ SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 set -e
 WORKDIR=~/.slim
 OUTPUT_PATH=$1
-ISO=$2
 
-echo $OUTPUT_PATH $ISO
+echo $OUTPUT_PATH
 
 # Prepare and reset build directories
 mkdir -p $WORKDIR

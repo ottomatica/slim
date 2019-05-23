@@ -30,6 +30,7 @@
     "js-yaml": "^3.13.1",
     "node-virtualbox": "^0.1.36",
     "progress": "^2.0.3",
+    "simple-git": "^1.113.0",
     "tar": "^4.4.8"
   }
 }

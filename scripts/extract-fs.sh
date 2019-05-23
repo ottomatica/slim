@@ -2,9 +2,9 @@
 
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 DOCKERFILE_PATH="$1"
-
+PKGS="$2"
 # pass the rest of the args to docker
-shift
+shift 3
 DOCKER_OPTS="$@"
 
 # Prepare and reset build directories
@@ -21,7 +21,7 @@ set -o pipefail
 echo "using docker opts $DOCKER_OPTS"
 
 # Use docker to build image
-docker build "$@" -t slim-vm --build-arg SSHPUBKEY="$(cat $SCRIPTPATH/keys/baker.pub)" $DOCKERFILE_PATH
+docker build "$@" -t slim-vm --build-arg SSHPUBKEY="$(cat $SCRIPTPATH/keys/baker.pub)" --build-arg PKGS=$PKGS $DOCKERFILE_PATH
 # Run a container and use export/import to flatten layers
 ID=$(docker run -it -d slim-vm sh)
 docker export $ID | docker import - slim-vm-flat
