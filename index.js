@@ -122,7 +122,7 @@ const Images= require('./lib/images');
             fs.mkdirSync(path.dirname(outputPath));
         }
         let slimDir = __dirname;
-        child.execSync(`${slimDir}/scripts/extract-fs.sh ${buildPath} ${pkgs} ${dockerOpts}`, {stdio: 'inherit'});
+        child.execSync(`${slimDir}/scripts/extract-fs.sh ${buildPath} "${pkgs}" ${dockerOpts}`, {stdio: 'inherit'});
         child.execSync(`${slimDir}/scripts/make-iso.sh ${outputPath}`, {stdio: 'inherit'})
 
         // Copy over to output directory
