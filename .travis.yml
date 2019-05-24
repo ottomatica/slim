@@ -3,22 +3,11 @@ language: node_js
 # docker cannot be run on osx in travis
 os: linux
 addons:
-  homebrew:
-    casks:
-      - docker
-      - vagrant
-    packages:
-      - gnu-tar
-      - cdrtools
-      - p7zip
   apt:
     packages:
       - vagrant
       - virtualbox
-      - udisks2
-      - p7zip-full
-      - p7zip-rar
       - genisoimage
-node_js: 8 
+node_js: 9
 install: npm install && npm link
 script: slim build images/alpine3.8-simple && slim images

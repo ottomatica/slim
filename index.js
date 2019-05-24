@@ -21,7 +21,6 @@ const Images = require('./lib/images');
 const docker = new Docker();
 
 const error = e => console.error(chalk.red(e));
-const warning = m => console.log(chalk.orange(m));
 const info = m => console.log(chalk.yellow(m));
 const ok = m => console.log(chalk.green(m));
 
@@ -49,12 +48,12 @@ const vmlinuz = `${boot}/vmlinuz`;
         const images = new Images();
 
         if (await images.exists(image, registery)) {
-            let info = await images.info(image, registery).catch(e => log(e));
+            let info = await images.info(image, registery).catch(e => error(e));
 
             let cpus = argv.cpus || info.cpus;
             let memory = argv.memory || info.memory;
 
-            await micro.create(argv.name, registery, { attach_iso: image, cpus: cpus, mem: memory }).catch(e => log(e));
+            await micro.create(argv.name, registery, { attach_iso: image, cpus: cpus, mem: memory }).catch(e => error(e));
         }
 
         else {
@@ -196,7 +195,7 @@ async function buildVM(dockerfilePath, outputPath, dockerOpts) {
                .on('error', err => reject(err))
         );
     });
-    container.remove().catch(e => undefined);
+    container.remove().catch(() => undefined);
 
     // move kernel
     await fs.move(`${slimvm}/vmlinuz`, vmlinuz);
