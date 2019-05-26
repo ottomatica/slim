@@ -105,8 +105,10 @@ const vmlinuz = `${boot}/vmlinuz`;
         let outputPath = path.join(registery, name, 'slim.iso');
         let infoPath = path.join(buildPath, 'info.yml');
 
+        fs.ensureDirSync(path.dirname(outputPath));
 
         if( !fs.existsSync(infoPath)) { error(`Expected required configuration file missing: ${infoPath}`); return; }
+        fs.copyFileSync(infoPath, path.join(path.dirname(outputPath),'info.yml'));
 
         let info = await yaml.safeLoad(fs.readFileSync(infoPath));
         let pkgs = "";
@@ -142,13 +144,11 @@ const vmlinuz = `${boot}/vmlinuz`;
             }
         }
 
-        fs.ensureDirSync(path.dirname(outputPath));
-
-        await buildVM(buildPath, outputPath, dockerOpts);
-
-        // Copy over to output directory
-        fs.copyFileSync(infoPath, path.join(path.dirname(outputPath),'info.yml'));
-
+        try {
+            await makeIso(buildPath, dockerOpts, outputPath);
+        } catch (e) {
+            error(e);
+        }
     })
     .option('cache', {
         boolean: true,
@@ -161,7 +161,7 @@ const vmlinuz = `${boot}/vmlinuz`;
 
 })();
 
-async function buildVM(dockerfilePath, outputPath, dockerOpts) {
+async function makeIso(dockerfilePath, dockerOpts, outputPath) {
     await Promise.all([
         fs.ensureDir(workdir),
         fs.emptyDir(slimvm),
@@ -169,35 +169,13 @@ async function buildVM(dockerfilePath, outputPath, dockerOpts) {
         fs.emptyDir(boot)
     ]);
 
-    await fs.copy(`${syslinux}`, `${isolinux}`);
-
     info('building docker image');
-    const image = await docker.buildImage({ context: dockerfilePath }, {
-        t: 'slim-vm',
-        ...dockerOpts
-    });
-    await new Promise((resolve, reject) => {
-        docker.modem.followProgress(
-            image,
-            (err, res) => err ? reject(err) : resolve(res),
-            ev => process.stdout.write(ev.stream)
-        );
-    });
+    await buildImage(dockerfilePath, dockerOpts);
 
     info('exporting docker filesystem');
-    const container = await docker.createContainer({ Image: 'slim-vm', Cmd: ['sh'] });
+    await exportImage('slim-vm', slimvm);
 
-    const contents = await container.export();
-    await new Promise((resolve, reject) => {
-        contents.pipe(
-            tar.x({ C: slimvm })
-               .on('close', resolve)
-               .on('error', err => reject(err))
-        );
-    });
-    container.remove().catch(() => undefined);
-
-    // move kernel
+    await fs.copy(`${syslinux}`, `${isolinux}`);
     await fs.move(`${slimvm}/vmlinuz`, vmlinuz);
 
     info('creating initrd');
@@ -211,6 +189,40 @@ async function buildVM(dockerfilePath, outputPath, dockerOpts) {
         -no-emul-boot -boot-load-size 4 -boot-info-table \
         -V slim -J -R ${slimiso}`,
         {stdio: 'inherit'});
+    child.execSync(`ls -la ${outputPath}`, {stdio: 'inherit'});
 
     ok('success!');
+}
+
+async function buildImage(dockerfilePath, dockerOpts) {
+    const image = await docker.buildImage({ context: dockerfilePath }, {
+        t: 'slim-vm',
+        ...dockerOpts
+    });
+    await new Promise((resolve, reject) => {
+        docker.modem.followProgress(
+            image,
+            (err, res) => err ? reject(err) : resolve(res),
+            ev => process.stdout.write(ev.stream)
+        );
+    });
+}
+
+async function exportImage(image, outdir) {
+    const container = await docker.createContainer({ Image: image, Cmd: ['sh'] });
+
+    const contents = await container.export();
+    try {
+        await new Promise((resolve, reject) => {
+            contents.pipe(
+                tar.x({ C: outdir })
+                   .on('close', resolve)
+                   .on('error', err => reject(err))
+            );
+        });
+    } catch (e) {
+        throw e;
+    } finally {
+        container.remove().catch(() => undefined);
+    }
 }
