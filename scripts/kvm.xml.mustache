@@ -1,0 +1,31 @@
+<domain type='kvm'>
+    <name>{{ name }}</name>
+    <os>
+        <type>hvm</type>
+        <kernel>{{ kernel }}</kernel>
+        <initrd>{{ initrd }}</initrd>
+        <cmdline>append modules=loop,squashfs,sd-mod,usb-storage quiet console=tty0 console=ttyS0,115200</cmdline>
+        <boot dev='hd'/>
+    </os>
+    <cpu mode='host-model' check='partial'>
+        <model fallback='allow'/>
+    </cpu>
+    <vcpu>{{ cpus }}</vcpu>
+    <memory unit='MiB'>{{ mem }}</memory>
+    <on_poweroff>destroy</on_poweroff>
+    <on_reboot>restart</on_reboot>
+    <on_crash>destroy</on_crash>
+    <devices>
+        <interface type='user'>
+            <model type='virtio' />
+        </interface>
+        <serial type='pty'>
+            <target type='isa-serial' port='0'>
+                <model name='isa-serial'/>
+            </target>
+        </serial>
+        <console type='pty'>
+            <target type='serial' port='0'/>
+        </console>
+    </devices>
+</domain>
