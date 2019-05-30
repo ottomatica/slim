@@ -1,4 +1,4 @@
-<domain type='kvm'>
+<domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
     <name>{{ name }}</name>
     <os>
         <type>hvm</type>
@@ -16,9 +16,6 @@
     <on_reboot>restart</on_reboot>
     <on_crash>destroy</on_crash>
     <devices>
-        <interface type='user'>
-            <model type='virtio' />
-        </interface>
         <serial type='pty'>
             <target type='isa-serial' port='0'>
                 <model name='isa-serial'/>
@@ -28,4 +25,11 @@
             <target type='serial' port='0'/>
         </console>
     </devices>
+    <qemu:commandline>
+        <!-- forward ssh -->
+        <qemu:arg value='-netdev' />
+        <qemu:arg value='user,id=eth0,hostfwd=tcp::{{ ssh_port }}-:22'/>
+        <qemu:arg value='-device'/>
+        <qemu:arg value='virtio-net,netdev=eth0'/>
+    </qemu:commandline>
 </domain>
