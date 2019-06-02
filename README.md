@@ -53,16 +53,15 @@ npm install
 npm link
 ```
 
-Unfortunately, due to the experimental nature, there are a few dependencies you must also install:
+Unfortunately, due to the experimental nature, there are a few system dependencies you must also install:
 
-* [docker](https://docs.docker.com/install/), for building and extracting kernel and filesystem.
-* cdrtools: `brew install cdrtools`, for building iso.
+* [docker](https://docs.docker.com/install/), for building and extracting the kernel and filesystem.
+* cdrtools: `brew install cdrtools`, for building the micro-vm iso.
 
-To boot and run the image, you also need either
+To boot and run the image, you also need a hypervisor:
 * [VirtualBox](https://www.virtualbox.org/wiki/Downloads), or `kvm`.
 
-
-For kvm, you can install the following dependencies:
+For kvm, you can install the following dependencies for ubuntu:
 
 ```bash
 sudo apt-get install qemu-kvm libvirt-bin virtinst bridge-utils cpu-checker mkisofs
