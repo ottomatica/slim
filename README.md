@@ -55,7 +55,15 @@ npm link
 
 Unfortunately, due to the experimental nature, there are a few dependencies you must also install:
 
-* [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
-* [docker](https://docs.docker.com/install/)
-* 7z: `brew install p7zip`
-* cdrtools: `brew install cdrtools`
+* [docker](https://docs.docker.com/install/), for building and extracting kernel and filesystem.
+* cdrtools: `brew install cdrtools`, for building iso.
+
+To boot and run the image, you also need either
+* [VirtualBox](https://www.virtualbox.org/wiki/Downloads), or `kvm`.
+
+
+For kvm, you can install the following dependencies:
+
+```bash
+sudo apt-get install qemu-kvm libvirt-bin virtinst bridge-utils cpu-checker mkisofs
+```
