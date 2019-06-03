@@ -2,6 +2,7 @@
 const yargs       = require('yargs');
 const { version } = require('./package.json');
 
+const { check } = require('./lib/dependencies');
 const env = require('./lib/env');
 
 // Environment reset/sanity check
@@ -12,6 +13,7 @@ const env = require('./lib/env');
     await env.setup();
 
     yargs
+        .middleware(check)
         .commandDir('./lib/commands')
         .version()
         .epilog(version ? `Version: ${version}`: '')
