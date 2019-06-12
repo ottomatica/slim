@@ -44,7 +44,7 @@ start_getty() {
 		echo "getty: cmdline has console=$tty but does not exist in $securetty; will not be able to log in as root on this tty $tty." | tee /dev/$tty
 	fi
 	# respawn forever
-	infinite_loop setsid.getty -w /sbin/agetty $loginargs $line $speed $tty $term &
+	infinite_loop setsid /sbin/agetty $loginargs $line $speed $tty $term &
 }
 
 

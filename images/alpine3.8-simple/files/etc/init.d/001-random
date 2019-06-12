@@ -1,7 +1,8 @@
+#!/bin/sh
 
 echo "flushing urandom"
 for i in `seq 1 10`;
-  do     
+  do
      head -c200 /dev/urandom > /dev/null
   done
 
