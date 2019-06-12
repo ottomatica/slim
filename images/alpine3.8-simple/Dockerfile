@@ -40,6 +40,10 @@ COPY files/init /init
 COPY files/bin /bin/
 COPY files/etc/ /etc/
 
+RUN echo "RNGD_OPTS=\"-f -r /dev/urandom\"" > /etc/conf.d/rngd
+RUN echo "Welcome to slim!" > /etc/motd
+RUN echo "ttyS0" >> /etc/securetty
+
 # Set an ssh key
 RUN mkdir -p /etc/ssh /root/.ssh && chmod 0700 /root/.ssh
 RUN echo $SSHPUBKEY > /root/.ssh/authorized_keys && chmod 600 /root/.ssh/authorized_keys
