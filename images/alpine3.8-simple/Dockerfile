@@ -39,7 +39,6 @@ RUN rm -rf /var/cache/apk/*
 COPY files/init /init
 COPY files/bin /bin/
 COPY files/etc/ /etc/
-COPY files/usr/ /usr/
 
 # Set an ssh key
 RUN mkdir -p /etc/ssh /root/.ssh && chmod 0700 /root/.ssh

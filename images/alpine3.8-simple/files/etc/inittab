@@ -1,6 +1,9 @@
 # /etc/inittab
 
 ::sysinit:/bin/rc.init
+::wait:/sbin/openrc default
+
+ttyS0::respawn:/sbin/agetty -a root -L ttyS0 115200 vt100
 
 ::ctrlaltdel:/bin/rc.shutdown reboot
 

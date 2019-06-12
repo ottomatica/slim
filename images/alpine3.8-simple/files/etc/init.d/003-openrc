@@ -1,4 +1,0 @@
-#!/bin/sh
-
-echo "switching openrc run-mode to default"
-/sbin/openrc default

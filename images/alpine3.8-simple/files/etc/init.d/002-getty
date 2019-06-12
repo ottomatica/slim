@@ -1,3 +1,0 @@
-#!/bin/sh
-
-INITGETTY=true INSECURE=true /usr/bin/rungetty.sh
