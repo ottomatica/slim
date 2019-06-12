@@ -37,13 +37,11 @@ RUN rm -rf /var/cache/apk/*
 
 # Our local files
 COPY files/init /init
-COPY files/bin/ /bin/
 
 RUN echo "RNGD_OPTS=\"-f -r /dev/urandom\"" > /etc/conf.d/rngd
 RUN echo "Welcome to slim!" > /etc/motd
 RUN echo "ttyS0" >> /etc/securetty
-RUN sed -i 's,/sbin/openrc sysinit,/bin/rc.init,' /etc/inittab
-RUN echo "ttyS0::respawn:/sbin/agetty -a root -L ttyS0 115200 vt100" >> /etc/inittab
+RUN echo "ttyS0::respawn:/sbin/agetty -a root -L ttyS0 115200 vt100" > /etc/inittab
 
 # Set an ssh key
 RUN mkdir -p /etc/ssh /root/.ssh && chmod 0700 /root/.ssh
