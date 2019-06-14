@@ -17,7 +17,10 @@ Create a micro-vm from a Dockerfile. Use `build` command with a directory contai
 $ slim build images/alpine3.8-simple
 ```
 
+![build](doc/img/build.png)
+
 This will add a bootable iso in the slim registry. [See example Dockerfile](https://github.com/ottomatica/slim/tree/master/images/alpine3.8-simple).
+
 
 ### Listing micro-vm images
 
@@ -33,11 +36,21 @@ $ slim images
 
 Provision a new instance of the given micro-vm image as a virtual machine (using virtualbox). Use `-p kvm` or `-p hyperkit` to switch providers.
 
+Using hyperkit (available on macOS).
+
+```
+$ slim run micro1 alpine3.8-simple -p hyperkit
+```
+
+![nanobox](doc/img/nanobox.png)
+
+Using virtualbox (default).
+
 ```
 $ slim run micro1 alpine3.8-simple
 ```
 
-![nanobox](doc/img/nanobox.png)
+![nanobox](doc/img/run-vbox.png)
 
 VirtualBox will run the micro-vm instance as an attached iso loaded into a cdrom, and boot up the iso in seconds.
 
