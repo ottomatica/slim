@@ -47,7 +47,7 @@ $ slim run micro1 alpine3.8-simple -p hyperkit
 Using virtualbox (default).
 
 ```
-$ slim run micro1 alpine3.8-simple
+$ slim run micro2 alpine3.8-simple
 ```
 
 ![nanobox](doc/img/run-vbox.png)
