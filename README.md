@@ -31,7 +31,7 @@ $ slim images
 
 ### Running a micro-vm
 
-Provision a new instance of the given micro-vm image as a virtual machine.
+Provision a new instance of the given micro-vm image as a virtual machine (using virtualbox). Use `-p kvm` or `-p hyperkit` to switch providers.
 
 ```
 $ slim run micro1 alpine3.8-simple
@@ -59,7 +59,7 @@ Unfortunately, due to the experimental nature, there are a few system dependenci
 * cdrtools: `brew install cdrtools`, for building the micro-vm iso.
 
 To boot and run the image, you also need a hypervisor:
-* [VirtualBox](https://www.virtualbox.org/wiki/Downloads), or `kvm`.
+* [VirtualBox](https://www.virtualbox.org/wiki/Downloads), `kvm` on Linux, or `hyperkit` on macOS.
 
 For kvm, you can install the following dependencies for ubuntu:
 
