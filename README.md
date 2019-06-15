@@ -1,6 +1,4 @@
-[![Build Status](https://travis-ci.org/ottomatica/slim.svg?branch=master)](https://travis-ci.org/ottomatica/slim)
-
-# slim
+# slim | [![Build Status](https://travis-ci.org/ottomatica/slim.svg?branch=master)](https://travis-ci.org/ottomatica/slim)
 
 `slim` will build a micro-vm from a Dockerfile. Slim works by building and extracting a rootfs from a Dockerfile, and then merging that filesystem with a small minimal kernel that runs in RAM.
 
@@ -59,11 +57,10 @@ Example: `ssh -i /Users/cjparnin/.slim/baker_rsa root@127.0.0.1 -p 2008 -o Stric
 
 ## Installing slim
 
-Simply clone this repo and run.
+Simply run:
 
 ```
-npm install
-npm link
+npm install -g ottomatica/slim
 ```
 
 Unfortunately, due to the experimental nature, there are a few system dependencies you must also install:
