@@ -57,10 +57,11 @@ Example: `ssh -i /Users/cjparnin/.slim/baker_rsa root@127.0.0.1 -p 2008 -o Stric
 
 ## Installing slim
 
-Simply run:
+Simply clone this repo and run:
 
 ```
-npm install -g ottomatica/slim
+npm install
+npm link
 ```
 
 Unfortunately, due to the experimental nature, there are a few system dependencies you must also install:
