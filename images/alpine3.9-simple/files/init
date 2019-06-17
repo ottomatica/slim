@@ -1,0 +1,107 @@
+#!/bin/sh
+
+# add a boot service to $sysroot
+rc_add() {
+	mkdir -p $sysroot/etc/runlevels/$2
+	ln -sf /etc/init.d/$1 $sysroot/etc/runlevels/$2/$1
+}
+
+rc_add sshd default
+rc_add dhcpcd default
+rc_add urandom default
+rc_add rngd default
+
+chown -R root:root /root
+
+echo "nanobox" > /etc/hostname
+
+modprobe virtio_net
+
+# mounts
+mount -t proc proc /proc -o nodev,nosuid,noexec,relatime
+mount -t tmpfs tmpfs /run -o nodev,nosuid,noexec,relatime,size=10%,mode=755
+mount -t tmpfs tmpfs /tmp -o nodev,nosuid,noexec,relatime,size=10%,mode=1777
+mount -t tmpfs tmpfs /var -o nodev,nosuid,noexec,relatime,size=50%,mode=755
+
+mkdir -m 0755 /var/cache /var/empty /var/lib /var/local /var/lock /var/log /var/opt /var/spool
+mkdir -m 01777 /var/tmp
+ln -s /run /var/run
+
+mount -t devtmpfs dev /dev -o nosuid,noexec,relatime,size=10m,nr_inodes=248418,mode=755
+mknod -m 0600 /dev/console c 5 1
+mknod -m 0620 /dev/tty1 c 4 1
+mknod -m 0666 /dev/tty 5 0
+mknod -m 0666 /dev/null 1 3
+mknod -m 0660 /dev/kmsg 1 11
+
+ln -s /proc/self/fd /dev/fd
+ln -s /proc/self/fd/0 /dev/stdin
+ln -s /proc/self/fd/1 /dev/stdout
+ln -s /proc/self/fd/2 /dev/stderr
+ln -s /proc/kcore /dev/kcore
+
+mkdir -m 01777 /dev/mqueue
+mkdir -m 01777 /dev/shm
+mkdir -m 0755 /dev/pts
+
+mount -t mqueue mqueue /dev/mqueue -o noexec,nosuid,nodev
+mount -t tmpfs shm /dev/shm -o noexec,nosuid,nodev,mode=1777
+mount -t devpts devpts /dev/pts -o noexec,nosuid,gid=5,mode=0620
+
+mount -t sysfs sysfs /sys -o noexec,nosuid,nodev
+
+# ignore errors
+mount -t securityfs /sys/kernel/security -o noexec,nosuid,nodev || true
+mount -t debugfs debugfs /sys/kernel/debug -o noexec,nosuid,nodev || true
+mount -t configfs configfs /sys/kernel/config -o noexec,nosuid,nodev || true
+mount -t fusectl fusectl /sys/fs/fuse/connections -o noexec,nosuid,nodev || true
+mount -t selinuxfs selinuxfs /sys/fs/selinux -o noexec,nosuid || true
+mount -t pstore pstore /sys/fs/pstore -o noexec,nosuid,nodev || true
+mount -t efivarfs efivarfs /sys/firmware/efi/efivars -o noexec,nosuid,nodev || true
+mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc -o noexec,nosuid,nodev || true
+
+mount -t tmpfs cgroup_root /sys/fs/cgroup -o nodev,noexec,nosuid,mode=755,size=10m
+
+while read c; do
+    if [[ "1" == $(echo "$c" | cut -f4) ]]; then
+        cg=$(echo "$c" | cut -f1)
+        mkdir -m 0555 "/sys/fs/cgroup/$cg"
+        mount -t cgroup "$cg" "/sys/fs/cgroup/$cg" -o "noexec,nosuid,nodev,$cg"
+    fi
+done < /proc/cgroups
+
+echo "1" > /sys/fs/cgroup/memory/memory.use_hierarchy
+
+mkdir -m 0555 /sys/fs/cgroup/systemd
+mount -t cgroup cgroup /sys/fs/cgroup/systemd -o none,name=systemd
+
+mount --make-rshared /
+
+# hotplug
+echo "/sbin/mdev" > /proc/sys/kernel/hotplug
+for x in $(ls /sys/bus/*/devices/*/modalias); do
+    /sbin/modprobe -abq $(cat "$x") || true;
+done
+
+# clock
+/sbin/hwclock --hctosys --utc
+
+# loopback
+/sbin/ip addr add 127.0.0.1/8 dev lo brd + scope host
+/sbin/ip route add 127.0.0.1/8 dev lo scope host
+/sbin/ip link set lo up
+
+# limits
+ulimit -n 1048576
+ulimit -p unlimited
+
+# hostname
+hostname $(cat /etc/hostname)
+
+# resolvconf
+touch /etc/resolv.conf
+
+# start default openrc level
+/sbin/openrc default
+
+exec /sbin/init
