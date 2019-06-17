@@ -1,6 +1,0 @@
-#af_packet
-#virtio
-virtio_net
-#virtio_rng
-#rng_core
-vboxsf

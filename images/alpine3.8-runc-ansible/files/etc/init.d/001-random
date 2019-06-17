@@ -1,9 +1,0 @@
-
-echo "flushing urandom"
-for i in `seq 1 10`;
-  do     
-     head -c200 /dev/urandom > /dev/null
-  done
-
-echo "settings for rngd"
-cat /etc/conf.d/rngd
