@@ -40,7 +40,6 @@ COPY files/init /init
 
 RUN echo "RNGD_OPTS=\"-f -r /dev/urandom\"" > /etc/conf.d/rngd
 RUN echo "Welcome to slim!" > /etc/motd
-RUN echo "ttyS0" >> /etc/securetty
 RUN echo "tty0::respawn:/sbin/agetty -a root -L tty0 38400 vt100" > /etc/inittab
 RUN echo "ttyS0::respawn:/sbin/agetty -a root -L ttyS0 115200 vt100" >> /etc/inittab
 
