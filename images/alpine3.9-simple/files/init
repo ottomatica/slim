@@ -101,6 +101,12 @@ hostname $(cat /etc/hostname)
 # resolvconf
 touch /etc/resolv.conf
 
+# mount shared folders
+mkdir -p /slim /host
+modprobe 9pnet_virtio vboxsf
+mount -t 9p -o trans=virtio 9p-share-0 /slim || mount.vboxsf vbox-share-0 /slim || true
+mount -t 9p -o trans=virtio 9p-share-1 /host || mount.vboxsf vbox-share-1 /host || true
+
 # start default openrc level
 /sbin/openrc default
 
