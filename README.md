@@ -92,7 +92,7 @@ Shared folders (mounting) with host system are possible. Some examples are docum
 
 #### Extending base images (experimental)
 
-Instead of having to copy and paste an image, we're experimenting with a reuse pattern that lets you reference an existing base image, and extend it by passing in build arguments. For example, by defining this in an `info.yml`, you could extend the base alpine3.9 image with ansible and runc.
+Instead of having to copy and extend an existing Dockerfile, we're experimenting with a reuse pattern that lets you reference an existing base image hosted in a git repository, and extend it by passing in build arguments. For example, by defining this in an `info.yml`, you could extend the base alpine3.9 image with ansible and runc.
 
 ```
 description: A simple configuration server with ansible and runc (for running containers).
