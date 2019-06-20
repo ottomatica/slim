@@ -78,6 +78,11 @@ Example: running `slim build images/alpine3.8-simple -p kvm -f qcow2` will build
 
 Shared folders (mounting) with host system are possible. Some examples are documented here: https://github.com/ottomatica/slim/issues/39
 
+#### Build and run parameters
+
+* Using `slim build <image> --no-cache` will skip the docker build cache, allowing you to repair stale apt-get caches, for example.
+* Using `slim run v0 ubuntu16.04-jenkins --memory 4096` will allow you allocate more memory to your instance.
+
 #### Example micro-vms
 
 A collection of micro-vms can be found here, including ubuntu base images, jenkins, kubenetes, and more: https://github.com/ottomatica/slim-images
