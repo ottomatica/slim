@@ -90,6 +90,18 @@ Shared folders (mounting) with host system are possible. Some examples are docum
 * You can delete a specific image in registry called "ubuntu" with `slim delete image ubuntu`
 * You can clean out the entire image registry with `slim clean`.
 
+#### Extending base images (experimental)
+
+Instead of having to copy and paste an image, we're experimenting with a reuse pattern that lets you reference an existing base image, and extend it by passing in build arguments. For example, by defining this in an `info.yml`, you could extend the base alpine3.9 image with ansible and runc.
+
+```
+description: A simple configuration server with ansible and runc (for running containers).
+base_repository: https://github.com/ottomatica/slim
+base_directory: images/alpine3.9-simple
+base_args:
+  PKGS: runc ansible
+```
+
 ## Example micro-vms
 
 A collection of micro-vms can be found here, including ubuntu base images, jenkins, kubenetes, and more: https://github.com/ottomatica/slim-images
