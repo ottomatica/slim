@@ -83,7 +83,14 @@ Shared folders (mounting) with host system are possible. Some examples are docum
 * Using `slim build <image> --no-cache` will skip the docker build cache, allowing you to repair stale apt-get caches, for example.
 * Using `slim run v0 ubuntu16.04-jenkins --memory 4096` will allow you allocate more memory to your instance.
 
-#### Example micro-vms
+#### Managing vms and images
+
+* You can get a list of vms with `slim vms`.
+* You can delete a specific vm called "v0" with `slim delete vm v0`
+* You can delete a specific image in registry called "ubuntu" with `slim delete image ubuntu`
+* You can clean out the entire image registry with `slim clean`.
+
+## Example micro-vms
 
 A collection of micro-vms can be found here, including ubuntu base images, jenkins, kubenetes, and more: https://github.com/ottomatica/slim-images
 
