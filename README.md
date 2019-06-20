@@ -34,12 +34,12 @@ $ slim images
 
 Provision a new instance of the given micro-vm image as a virtual machine.
 
-Slim currently supports Virtualbox, KVM, and hyperkit (MacOS only) as providers for running VMs. Slim will default to KVM or hyperkit if installed, but the `-p` flag can be used to force Slim to use a specific provider.
+Slim currently supports Virtualbox, KVM, and hyperkit (MacOS only) as providers for running VMs. Slim will discover all available providers, defaulting to virtualbox, if more than one provider is available.  The `-p` flag can be used to force Slim to use a specific provider.
 
-Using hyperkit:
+Using hyperkit (requires sudo):
 
 ```
-$ slim run micro1 alpine3.8-simple
+$ slim run micro1 alpine3.8-simple -p hyperkit
 ```
 
 ![nanobox](doc/img/nanobox.png)
@@ -47,7 +47,7 @@ $ slim run micro1 alpine3.8-simple
 Using virtualbox:
 
 ```
-$ slim run micro2 alpine3.8-simple -p virtualbox
+$ slim run micro2 alpine3.8-simple
 ```
 
 ![nanobox](doc/img/run-vbox.png)
