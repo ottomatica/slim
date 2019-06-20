@@ -18,19 +18,7 @@ $ slim build images/alpine3.8-simple
 
 This will add a bootable iso in the slim registry. [See example Dockerfile](https://github.com/ottomatica/slim/tree/master/images/alpine3.8-simple).
 
-`slim build` will use your [default provider](#running-a-micro-vm) unless the `-p` flag is specified (ie `-p virtualbox`).
-
-Slim supports building multiple image formats, but by default will only build the image required for the given provider. The `-f` flag can be used to specify any additional image formats that should be built, which will be stored in the registry directory for that image. The currently supported formats and their corresponding providers are:
-
-&#8203; | raw | iso | qcow2
---- | --- | --- | ---
-kvm | ✓ | ✓ | ✓
-hyperkit | ✓ | ✓ |
-virtualbox | ✓ | ✓ |
-
-* The `raw` format signifies an unbundled ramfs archive and kernel.
-
-Example: running `slim build images/alpine3.8-simple -p kvm -f qcow2` will build a `raw` image (KVM's default image format), as well as a `qcow2` image.
+`slim build` will use your [default provider](#running-a-micro-vm) unless the `-p` flag is specified (ie `-p hyperkit`).
 
 ### Listing micro-vm images
 
@@ -69,6 +57,30 @@ VirtualBox will run the micro-vm instance as an attached iso loaded into a cdrom
 For convenience, a ssh connection command is provided at the end of the command, allowing easy access into the machine:
 
 Example: `ssh -i /Users/cjparnin/.slim/baker_rsa root@127.0.0.1 -p 2008 -o StrictHostKeyChecking=no`
+
+## Advanced Features
+
+#### Build formats
+
+Slim supports building multiple image formats, but by default will only build the image required for the given provider. The `-f` flag can be used to specify any additional image formats that should be built, which will be stored in the registry directory for that image. The currently supported formats and their corresponding providers are:
+
+&#8203; | raw | iso | qcow2
+--- | --- | --- | ---
+kvm | ✓ | ✓ | ✓
+hyperkit | ✓ | ✓ |
+virtualbox | ✓ | ✓ |
+
+* The `raw` format signifies an unbundled ramfs archive and kernel.
+
+Example: running `slim build images/alpine3.8-simple -p kvm -f qcow2` will build a `raw` image (KVM's default image format), as well as a `qcow2` image.
+
+#### Shared Folders
+
+Shared folders (mounting) with host system are possible. Some examples are documented here: https://github.com/ottomatica/slim/issues/39
+
+#### Example micro-vms
+
+A collection of micro-vms can be found here, including ubuntu base images, jenkins, kubenetes, and more: https://github.com/ottomatica/slim-images
 
 ## Installing slim
 
