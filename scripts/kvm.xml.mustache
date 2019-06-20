@@ -25,6 +25,15 @@
         <console type='pty'>
             <target type='serial' port='0'/>
         </console>
+        {{ #syncs }}
+        <!-- use 'squash' mode to get around permission issues -->
+        <filesystem type='mount' accessmode='squash'>
+            <driver type='path' wrpolicy='immediate' />
+            <source dir='{{ host }}' />
+            <!-- target should specify a label used in a mount command, rather than a directory -->
+            <target dir='{{ label }}' />
+        </filesystem>
+        {{ /syncs }}
     </devices>
     <qemu:commandline>
         <!-- forward ssh -->
