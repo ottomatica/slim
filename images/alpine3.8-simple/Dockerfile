@@ -4,7 +4,7 @@ RUN apk add --no-cache --initdb openrc
 
 FROM alpine:3.8.4 AS kernel
 RUN mkdir -p /lib/apk/db /run
-RUN apk add --no-cache --initdb linux-virt
+RUN apk add --no-cache --initdb linux-virt virtualbox-guest-modules-virt
 
 FROM alpine:3.8.4 AS install
 USER root
@@ -26,10 +26,9 @@ COPY --from=kernel /lib/modules /lib/modules
 # Copy kernel for later use
 COPY --from=kernel /boot/vmlinuz-virt /vmlinuz
 
-RUN echo "http://dl-cdn.alpinelinux.org/alpine/v3.8/community" >> /etc/apk/repositories
 RUN mkdir -p /lib/apk/db /run
 RUN apk add --update --no-cache --initdb alpine-baselayout apk-tools busybox ca-certificates util-linux \
-    openssh openssh-client rng-tools dhcpcd
+    openssh openssh-client rng-tools dhcpcd virtualbox-guest-additions
 RUN [ ! -z "$PKGS" ] && apk add --no-cache $PKGS || echo "No optional pkgs provided."
 
 # Deleted cached packages
