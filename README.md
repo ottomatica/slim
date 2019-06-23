@@ -76,12 +76,12 @@ Example: running `slim build images/alpine3.8-simple -p kvm -f qcow2` will build
 
 #### Shared Folders
 
-Shared folders (mounting) with host system are possible. Some examples are documented here: https://github.com/ottomatica/slim/issues/39
+Slim will automatically mount `/` at `/host` and `cwd` (ie the directory where you run the slim run command) at `/slim` within the VM. This automounting can be disabled by passing the `--sync=no` option in the slim run command. The example [alpine3.8-simple](https://github.com/ottomatica/slim/tree/master/images/alpine3.8-simple) and [ubuntu16.04-simple](https://github.com/ottomatica/slim-images/tree/master/ubuntu16.04-simple) images illustrate how to support mounting within the image, and is documented [here](https://github.com/ottomatica/slim/issues/39).
 
 #### Build and run parameters
 
 * Using `slim build <image> --no-cache` will skip the docker build cache, allowing you to repair stale apt-get caches, for example.
-* Using `slim run v0 ubuntu16.04-jenkins --memory 4096` will allow you allocate more memory to your instance.
+* Using `slim run v0 ubuntu16.04-jenkins --memory 4096 --cpus 2` will allow you allocate more memory and cpus to your instance.
 
 #### Managing vms and images
 
