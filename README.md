@@ -86,6 +86,7 @@ Slim will automatically mount `/` at `/host` and `cwd` (ie the directory where y
 #### Managing vms and images
 
 * You can get a list of vms with `slim vms`.
+* Force shutdown of a vm. `slim stop micro1` (Note: for hyperkit, this will be the equivalent of delete.)
 * You can delete a specific vm called "v0" with `slim delete vm v0`
 * You can delete a specific image in registry called "ubuntu" with `slim delete image ubuntu`
 * You can clean out the entire image registry with `slim clean`.
