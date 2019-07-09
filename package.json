@@ -33,7 +33,7 @@
     "mustache": "^3.0.1",
     "node-virtualbox": "^0.2.3",
     "progress": "^2.0.3",
-    "simple-git": "^1.118.0",
+    "simple-git": "^1.119.0",
     "sudo-prompt": "^9.0.0",
     "tar": "^4.4.10",
     "uuid": "^3.3.2"
