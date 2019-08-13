@@ -1,4 +1,3 @@
-
 language: node_js
 # docker cannot be run on osx in travis
 os: linux
@@ -8,6 +7,5 @@ addons:
       - vagrant
       - virtualbox
       - genisoimage
-node_js: 9
 install: npm install && npm link
 script: slim build images/alpine3.8-simple && slim images
