@@ -34,7 +34,7 @@
     "node-virtualbox": "^0.2.3",
     "progress": "^2.0.3",
     "simple-git": "^1.126.0",
-    "sudo-prompt": "^9.0.0",
+    "sudo-prompt": "^9.1.0",
     "tar": "^5.0.5",
     "uuid": "^3.3.3"
   }
