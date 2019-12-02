@@ -12,7 +12,8 @@ const env = require('./lib/env');
 // - required files
 (async () => {
     await env.setup();
-    await storage.init();
+    const { persistdir } = env.vars();
+    await storage.init({dir: persistdir});
 
     yargs
         .middleware(check)
