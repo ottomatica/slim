@@ -31,7 +31,7 @@
     "fs-extra": "^8.1.0",
     "hasbin": "^1.2.3",
     "js-yaml": "^3.13.1",
-    "mustache": "^3.2.0",
+    "mustache": "^3.2.1",
     "node-persist": "^3.0.5",
     "node-virtualbox": "^0.2.3",
     "progress": "^2.0.3",
