@@ -25,6 +25,7 @@ mount -t tmpfs tmpfs /var -o nodev,nosuid,noexec,relatime,size=50%,mode=755
 
 mkdir -m 0755 /var/cache /var/empty /var/lib /var/local /var/lock /var/log /var/opt /var/spool
 mkdir -m 01777 /var/tmp
+mkdir -m 0755 /var/cache/apk
 ln -s /run /var/run
 
 mount -t devtmpfs dev /dev -o nosuid,noexec,relatime,size=10m,nr_inodes=248418,mode=755

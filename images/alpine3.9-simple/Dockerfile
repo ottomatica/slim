@@ -26,7 +26,6 @@ COPY --from=kernel /lib/modules /lib/modules
 # Copy kernel for later use
 COPY --from=kernel /boot/vmlinuz-virt /vmlinuz
 
-RUN echo "http://dl-cdn.alpinelinux.org/alpine/v3.9/community" >> /etc/apk/repositories
 RUN mkdir -p /lib/apk/db /run
 RUN apk add --update --no-cache --initdb alpine-baselayout apk-tools busybox ca-certificates util-linux \
     openssh openssh-client rng-tools dhcpcd virtualbox-guest-additions
