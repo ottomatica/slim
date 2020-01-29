@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/ottomatica/slim#readme",
   "dependencies": {
-    "@octokit/rest": "^16.36.0",
+    "@octokit/rest": "^16.40.1",
     "chalk": "^3.0.0",
     "dockerode": "^3.0.2",
     "download": "^7.1.0",
