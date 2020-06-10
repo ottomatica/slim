@@ -1,12 +1,12 @@
-FROM alpine:3.12.0 AS openrc
+FROM alpine:3.12 AS openrc
 RUN mkdir -p /lib/apk/db /run
 RUN apk add --no-cache --initdb openrc
 
-FROM alpine:3.12.0 AS kernel
+FROM alpine:3.12 AS kernel
 RUN mkdir -p /lib/apk/db /run
 RUN apk add --no-cache --initdb linux-virt virtualbox-guest-modules-virt
 
-FROM alpine:3.12.0 AS install
+FROM alpine:3.12 AS install
 USER root
 # the public key that is authorized to connect to this instance.
 ARG SSHPUBKEY
