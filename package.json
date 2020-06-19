@@ -33,7 +33,7 @@
     "is-port-available": "^0.1.5",
     "js-yaml": "^3.13.1",
     "mustache": "^4.0.1",
-    "node-persist": "^3.0.5",
+    "node-persist": "^3.1.0",
     "node-virtualbox": "^0.2.3",
     "progress": "^2.0.3",
     "simple-git": "^1.131.0",
