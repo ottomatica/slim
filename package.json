@@ -27,7 +27,7 @@
     "@octokit/rest": "^18.0.0",
     "chalk": "^3.0.0",
     "dockerode": "^3.1.0",
-    "download": "^7.1.0",
+    "download": "^8.0.0",
     "fs-extra": "^8.1.0",
     "hasbin": "^1.2.3",
     "is-port-available": "^0.1.5",
