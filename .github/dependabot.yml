@@ -1,0 +1,50 @@
+version: 2
+updates:
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "11:00"
+    timezone: EST
+  open-pull-requests-limit: 10
+  reviewers:
+  - ssmirr
+  ignore:
+  - dependency-name: y18n
+    versions:
+    - 4.0.1
+    - 4.0.2
+  - dependency-name: "@octokit/rest"
+    versions:
+    - 18.0.15
+    - 18.1.0
+    - 18.1.1
+    - 18.2.0
+    - 18.2.1
+    - 18.3.0
+    - 18.3.1
+    - 18.3.2
+    - 18.3.3
+    - 18.3.4
+    - 18.3.5
+    - 18.4.0
+    - 18.5.0
+    - 18.5.2
+  - dependency-name: simple-git
+    versions:
+    - 2.31.0
+    - 2.32.0
+    - 2.34.2
+    - 2.35.0
+    - 2.35.1
+    - 2.35.2
+    - 2.36.0
+    - 2.36.1
+    - 2.36.2
+    - 2.37.0
+  - dependency-name: js-yaml
+    versions:
+    - 4.0.0
+  - dependency-name: dockerode
+    versions:
+    - 3.2.1
