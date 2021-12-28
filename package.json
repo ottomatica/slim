@@ -1,6 +1,6 @@
 {
   "name": "slim",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "small and sleek computing environments",
   "main": "index.js",
   "bin": "index.js",
