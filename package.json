@@ -1,6 +1,6 @@
 {
   "name": "slim",
-  "version": "1.1.1",
+  "version": "1.2.1",
   "description": "small and sleek computing environments",
   "main": "index.js",
   "bin": "index.js",
@@ -26,6 +26,7 @@
   "dependencies": {
     "@octokit/rest": "^18.0.0",
     "chalk": "^4.1.0",
+    "cpio-fs": "^1.1.0",
     "dockerode": "^3.1.0",
     "download": "^8.0.0",
     "fs-extra": "^9.0.1",
