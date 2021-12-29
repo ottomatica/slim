@@ -1,3 +1,0 @@
-description: A simple ubuntu xenial server.
-base_args:
-  PKGS: tmux

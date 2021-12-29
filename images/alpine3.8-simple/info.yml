@@ -1,3 +1,0 @@
-description: A basic alpine server with ssh.
-base_args:
-  PKGS: tmux
