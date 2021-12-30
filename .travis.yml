@@ -8,4 +8,4 @@ addons:
       - virtualbox
       - genisoimage
 install: npm install && npm link
-script: slim build images/alpine3.8-simple && slim images
+script: slim build images/alpine3.12-virtualbox

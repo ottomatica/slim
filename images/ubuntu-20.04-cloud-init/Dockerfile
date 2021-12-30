@@ -5,10 +5,10 @@ RUN apt-get update && \
 
 FROM ubuntu:20.04
 
-# copy the kernel for later use
+# Extract the kernel, modules, and initrd
 COPY --from=kernel /lib/modules /lib/modules
 COPY --from=kernel /boot/vmlinuz-* /vmlinuz
+COPY --from=kernel /boot/initrd.img-* /initrd
 
 RUN apt-get update 
 RUN apt install cloud-init -y
-
