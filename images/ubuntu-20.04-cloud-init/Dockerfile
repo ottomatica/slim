@@ -11,4 +11,4 @@ COPY --from=kernel /boot/vmlinuz-* /vmlinuz
 COPY --from=kernel /boot/initrd.img-* /initrd
 
 RUN apt-get update 
-RUN apt install cloud-init udev -y
+RUN apt install cloud-init udev kmod -y
