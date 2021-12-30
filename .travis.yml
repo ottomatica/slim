@@ -1,3 +1,7 @@
+branches:
+  only: 
+    - master
+    - 2.x
 language: node_js
 # docker cannot be run on osx in travis
 os: linux
