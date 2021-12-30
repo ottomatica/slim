@@ -7,7 +7,8 @@ mount -t ext4 rootfs.ext4 /tmp/rootfs
 # Copy extracted rootfs into mounted image
 echo "Copying rootfs"
 cp -a /slim-vm/. /tmp/rootfs
-chown -R root:root /tmp/rootfs
+echo "LABEL=slim-rootfs	/	 ext4	discard,errors=remount-ro	0 1" >> /tmp/rootfs/etc/fstab
+#chown -R root:root /tmp/rootfs
 # Finalize
 umount /tmp/rootfs
 tune2fs -O ^read-only -L "slim-rootfs" rootfs.ext4
