@@ -1,0 +1,3 @@
+description: A simple ubuntu 20.04 server with cloud-init.
+base_args:
+  PKGS: tmux

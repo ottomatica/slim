@@ -1,0 +1,40 @@
+#cloud-config
+debug: true
+disable_root: false
+users:
+  - name: ubuntu
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: users, admin
+    home: /home/ubuntu
+    shell: /bin/bash
+    lock_passwd: false
+    ssh-authorized-keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGKxzz9dfF1vxLkHL++/BkLM/3CpxQeQgQM10T2ZmhlA
+ssh_pwauth: true
+disable_root: false
+chpasswd:
+  list: |
+     ubuntu:ubuntu
+  expire: False
+
+write_files:
+  - path: /etc/netplan/basicvm-net.yaml
+    permission: '0644'
+    content: |
+      network:
+        ethernets:
+            enp0s1:
+                dhcp4: true
+        version: 2
+  - path: /etc/fstab
+    content: | 
+      basicvm_shared_dir /home/ubuntu/shared virtiofs rw,noatime,_netdev 0 0
+    append: true
+
+runcmd:
+  - rm /etc/netplan/50-cloud-init.yaml
+  - netplan generate
+  - netplan apply
+  - mkdir -p /home/ubuntu/shared
+
+final_message: "The system started in $UPTIME seconds"
