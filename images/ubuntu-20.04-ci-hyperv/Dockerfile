@@ -21,6 +21,8 @@ RUN update-initramfs -u
 RUN mv /boot/vmlinuz-* /vmlinuz
 RUN mv /boot/initrd.img-* /initrd
 
+COPY grub.cfg /BOOT/EFI/grub.cfg
+
 # Needed for configuring server and setting up devices.
 RUN apt install cloud-init udev kmod -y
 # Quality of life:
