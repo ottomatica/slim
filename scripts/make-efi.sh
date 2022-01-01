@@ -1,109 +1,101 @@
-#!/bin/sh
+#!/bin/bash
+echo "Creating disk sized $1M"
+dd if=/dev/zero of=rootfs.ext4 bs=1M count=$1
 
-set -e
-IMGFILE=$PWD/disk.img
-# we want everything except the final result to stderr
-( exec 1>&2;
-
-ESP_FILE=$PWD/boot.img
-
-# get the GRUB2 boot file name
-ARCH=`uname -m`
-case $ARCH in
-x86_64)
-  BOOTFILE=BOOTX64.EFI
-  LINUX_ENTRY=linuxefi
-  INITRD_ENTRY=initrdefi
-  ;;
-aarch64)
-  BOOTFILE=BOOTAA64.EFI
-  LINUX_ENTRY=linux
-  INITRD_ENTRY=initrd
-  ;;
-esac
-
-mkdir -p /tmp/efi
-cd /tmp/efi
-
-INITRD="./initrd"
-KERNEL="vmlinuz"
-CMDLINE="$(cat $CMDLINE_FILE )"
-
-# PARTUUID for root
-PARTUUID=$(cat /proc/sys/kernel/random/uuid)
-
-cp /usr/local/share/$BOOTFILE .
-
-mkdir -p EFI/BOOT
-cat >> EFI/BOOT/grub.cfg <<EOF
-set timeout=0
-set gfxpayload=text
-menuentry 'LinuxKit ISO Image' {
-	$LINUX_ENTRY /kernel ${CMDLINE} text
-  $INITRD_ENTRY /initrd.img
-}
+# to create the partitions programatically (rather than manually)
+# we're going to simulate the manual input to fdisk
+# The sed script strips off all the comments so that we can 
+# document what we're doing in-line with the actual commands
+# Note that a blank line (commented as "defualt" will send a empty
+# line terminated with a newline to take the fdisk default.
+sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | fdisk rootfs.ext4
+  o # clear the in memory partition table
+  n # new partition
+  p # primary partition
+  1 # partition number 1
+    # default - start at beginning of disk 
+  +100M # 100 MB boot parttion
+  t # Change partition type
+  ef # EFI (FAT-12/16/32)
+  n # new partition
+  p # primary partition
+  2 # partion number 2
+    # default, start immediately after preceding partition
+    # default, extend partition to end of disk
+  t # Change type
+  2 # partion number 2
+  t # ext4
+  83 # Linux
+  a # make a partition bootable
+  1 # bootable partition is partition 1 -- /dev/sda1
+  p # print the in-memory partition table
+  w # write the partition table
+  q # and we're done
 EOF
 
-#
-# calculate sizes
-KERNEL_FILE_SIZE=$(stat -c %s "$KERNEL")
-INITRD_FILE_SIZE=$(stat -c %s "$INITRD")
-EFI_FILE_SIZE=$(stat -c %s "$BOOTFILE")
-# minimum headroom needed in ESP, in bytes
-# 511KiB headroom seems to be enough
-ESP_HEADROOM=$(( 1024 * 1024 ))
+# Automatically mount partitions on loop devices.
+# losetup --partscan --find --show rootfs.ext4
 
-# this is the minimum size of our EFI System Partition
-ESP_FILE_SIZE=$(( $KERNEL_FILE_SIZE + $INITRD_FILE_SIZE + $EFI_FILE_SIZE + $ESP_HEADROOM ))
+# Bug: Loop device partitions do not show inside container
+# https://github.com/moby/moby/issues/27886
 
-# (x+1024)/1024*1024 rounds up to multiple of 1024KB, or 2048 sectors
-# some firmwares get confused if the partitions are not aligned on 2048 blocks
-# we will round up to the nearest multiple of 2048 blocks
-# since each block is 512 bytes, we want the size to be a multiple of
-# 2048 blocks * 512 bytes = 1048576 bytes = 1024KB
-ESP_FILE_SIZE_KB=$(( ( ( ($ESP_FILE_SIZE+1024-1) / 1024 ) + 1024-1) / 1024 * 1024 ))
-# and for sectors
-ESP_FILE_SIZE_SECTORS=$(( $ESP_FILE_SIZE_KB * 2 ))
+# Workaround (tonyfahrion)
+LOOPDEV=$(losetup --find --show --partscan rootfs.ext4)
 
-# create a raw disk with an EFI boot partition
-# Stuff it into a FAT filesystem, making it as small as possible.
-mkfs.vfat -v -C $ESP_FILE $(( $ESP_FILE_SIZE_KB )) > /dev/null
-echo "mtools_skip_check=1" >> /etc/mtools.conf && \
-mmd -i $ESP_FILE ::/EFI
-mmd -i $ESP_FILE ::/EFI/BOOT
-mcopy -i $ESP_FILE $BOOTFILE ::/EFI/BOOT/
-mcopy -i $ESP_FILE EFI/BOOT/grub.cfg ::/EFI/BOOT/
-mcopy -i $ESP_FILE $KERNEL ::/
-mcopy -i $ESP_FILE $INITRD ::/
+# drop the first line, as this is our LOOPDEV itself, but we only want the child partitions
+PARTITIONS=$(lsblk --raw --output "MAJ:MIN" --noheadings ${LOOPDEV} | tail -n +2)
 
+echo "FS ", $LOOPDEV, $PARTITIONS
 
-# now make our actual filesystem image
-# how big an image do we want?
-# it should be the size of our ESP file+1MB for BIOS boot + 1MB for MBR + 1MB for GPT
-ONEMB=$(( 1024 * 1024 ))
-SIZE_IN_BYTES=$(( $(stat -c %s "$ESP_FILE") + 4*$ONEMB ))
+COUNTER=1
+for i in $PARTITIONS; do
+    MAJ=$(echo $i | cut -d: -f1)
+    MIN=$(echo $i | cut -d: -f2)
+    if [ ! -e "${LOOPDEV}p${COUNTER}" ]; then 
+        echo "Creating loop partition", ${LOOPDEV}p${COUNTER}
+        mknod ${LOOPDEV}p${COUNTER} b $MAJ $MIN; 
+    fi
+    COUNTER=$((COUNTER + 1))
+done 
 
-# and make sure the ESP is bootable for BIOS mode
-# settings
-BLKSIZE=512
-MB_BLOCKS=$(( $SIZE_IN_BYTES / $ONEMB ))
+lsblk
 
-# make the image
-dd if=/dev/zero of=$IMGFILE bs=1M count=$MB_BLOCKS
+# Format ESI partition (ESP) and install bootloader (syslinux)
+mkdosfs ${LOOPDEV}p1
+syslinux -i ${LOOPDEV}p1
+ESP=/tmp/esp
+mkdir $ESP && mount ${LOOPDEV}p1 $ESP
+mkdir -p $ESP/EFI/BOOT
 
-ESP_SECTOR_START=2048
-ESP_SECTOR_END=$(( $ESP_SECTOR_START + $ESP_FILE_SIZE_SECTORS - 1 ))
+# Prepare bootloader configuration
+echo "DEFAULT linux" > $ESP/EFI/BOOT/syslinux.cfg
+echo "LABEL linux" >> $ESP/EFI/BOOT/syslinux.cfg
+echo "KERNEL /vmlinuz" >> $ESP/EFI/BOOT/syslinux.cfg
+echo "INITRD /initrd" >> $ESP/EFI/BOOT/syslinux.cfg
+echo "APPEND root=/dev/sda2 console=tty0 console=ttyS0,115200n8" >> $ESP/EFI/BOOT/syslinux.cfg
 
-# create the partitions - size of the ESP must match our image
-# and make sure the ESP is bootable for BIOS mode
-sgdisk --clear \
-    --new 1:$ESP_SECTOR_START:$ESP_SECTOR_END --typecode=1:ef00 --change-name=1:'EFI System' --partition-guid=1:$PARTUUID \
-    --attributes 1:set:2 \
-     $IMGFILE
+# Syslinux needs kernel and initrd on same partition.
+cp /slim-vm/boot/vmlinuz $ESP/vmlinuz
+cp /slim-vm/boot/initrd $ESP/initrd
 
-# copy in our EFI System Partition image
-dd if=$ESP_FILE of=$IMGFILE bs=$BLKSIZE count=$ESP_FILE_SIZE_SECTORS conv=notrunc seek=$ESP_SECTOR_START
+# Prepare rootfs partition
+mkfs.ext4 ${LOOPDEV}p2
+mkdir -p /tmp/rootfs
+mount -t ext4 ${LOOPDEV}p2 /tmp/rootfs
 
-)
+# Copy extracted rootfs into mounted image
+echo "Copying rootfs"
+cp -a /slim-vm/. /tmp/rootfs
+echo "LABEL=slim-rootfs	/	 ext4	discard,errors=remount-ro	0 1" >> /tmp/rootfs/etc/fstab
 
-cat $IMGFILE
+# Label
+tune2fs -O ^read-only -L "slim-rootfs" ${LOOPDEV}p2
+
+# Cleanup
+umount ${LOOPDEV}p1
+umount ${LOOPDEV}p2
+losetup -d ${LOOPDEV}
+
+# Store back on host
+mv rootfs.ext4 /out/rootfs
+echo "Done"
