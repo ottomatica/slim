@@ -62,7 +62,6 @@ lsblk
 
 # Format ESI partition (ESP) and install bootloader (syslinux)
 mkdosfs ${LOOPDEV}p1
-syslinux -i ${LOOPDEV}p1
 ESP=/tmp/esp
 mkdir $ESP && mount ${LOOPDEV}p1 $ESP
 mkdir -p $ESP/EFI/BOOT
@@ -70,13 +69,17 @@ mkdir -p $ESP/EFI/BOOT
 # Prepare bootloader configuration
 echo "DEFAULT linux" > $ESP/EFI/BOOT/syslinux.cfg
 echo "LABEL linux" >> $ESP/EFI/BOOT/syslinux.cfg
-echo "KERNEL /vmlinuz" >> $ESP/EFI/BOOT/syslinux.cfg
-echo "INITRD /initrd" >> $ESP/EFI/BOOT/syslinux.cfg
+echo "KERNEL vmlinuz" >> $ESP/EFI/BOOT/syslinux.cfg
+echo "INITRD initrd" >> $ESP/EFI/BOOT/syslinux.cfg
 echo "APPEND root=/dev/sda2 console=tty0 console=ttyS0,115200n8" >> $ESP/EFI/BOOT/syslinux.cfg
 
 # Syslinux needs kernel and initrd on same partition.
-cp /slim-vm/boot/vmlinuz $ESP/vmlinuz
-cp /slim-vm/boot/initrd $ESP/initrd
+cp /slim-vm/boot/vmlinuz $ESP/EFI/BOOT/vmlinuz
+cp /slim-vm/boot/initrd $ESP/EFI/BOOT/initrd
+
+# Copy syslinux efi files
+cp syslinux-6.03/efi64/efi/syslinux.efi $ESP/EFI/BOOT/bootx64.efi
+cp syslinux-6.03/efi64/com32/elflink/ldlinux/ldlinux.e64 $ESP/EFI/BOOT/ldlinux.e64
 
 # Prepare rootfs partition
 mkfs.ext4 ${LOOPDEV}p2

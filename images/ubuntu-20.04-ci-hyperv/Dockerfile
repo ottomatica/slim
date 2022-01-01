@@ -14,15 +14,9 @@ hv_netvsc\n' >> /etc/initramfs-tools/modules
 
 RUN update-initramfs -u
 
-# # Extract the kernel, modules, and initrd
-# COPY --from=kernel /lib/modules /lib/modules
-# COPY --from=kernel /boot/vmlinuz-* /vmlinuz
-# COPY --from=kernel /boot/initrd.img-* /initrd
+# Move for easier extraction.
 RUN mv /boot/vmlinuz-* /vmlinuz
 RUN mv /boot/initrd.img-* /initrd
-
-COPY grub.cfg /EFI/BOOT/grub.cfg
-COPY bootx64.efi /EFI/BOOT/BOOTX64.efi
 
 # Needed for configuring server and setting up devices.
 RUN apt install cloud-init udev kmod -y
