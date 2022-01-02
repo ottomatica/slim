@@ -62,25 +62,43 @@ ESP=/tmp/esp
 mkdir $ESP && mount ${LOOPDEV}p1 $ESP
 mkdir -p $ESP/EFI/BOOT
 
+# Copy syslinux efi files
+#cp syslinux-6.03/efi64/efi/syslinux.efi $ESP/EFI/BOOT/bootx64.efi
+#cp syslinux-6.03/efi64/com32/elflink/ldlinux/ldlinux.e64 $ESP/EFI/BOOT/ldlinux.e64
+
 # Prepare bootloader configuration
-echo "DEFAULT linux" > $ESP/EFI/BOOT/syslinux.cfg
-echo "LABEL linux" >> $ESP/EFI/BOOT/syslinux.cfg
-echo "KERNEL vmlinuz" >> $ESP/EFI/BOOT/syslinux.cfg
-echo "INITRD initrd" >> $ESP/EFI/BOOT/syslinux.cfg
-echo "APPEND root=/dev/sda2 console=tty0 console=ttyS0,115200n8" >> $ESP/EFI/BOOT/syslinux.cfg
+#echo "DEFAULT linux" > $ESP/EFI/BOOT/syslinux.cfg
+#echo "LABEL linux" >> $ESP/EFI/BOOT/syslinux.cfg
+#echo "KERNEL vmlinuz" >> $ESP/EFI/BOOT/syslinux.cfg
+#echo "INITRD initrd" >> $ESP/EFI/BOOT/syslinux.cfg
+#echo "APPEND root=/dev/sda2 console=tty0 console=ttyS0,115200n8" >> $ESP/EFI/BOOT/syslinux.cfg
+
+cat >> $ESP/EFI/BOOT/grub.cfg <<EOF
+set timeout=0
+set gfxpayload=text
+menuentry 'Slim' {
+	linuxefi kernel root=/dev/sda2 console=tty0 console=ttyS0,115200n8 text
+  initrdefi initrd
+}
+EOF
+
+GRUB_MODULES="part_gpt fat ext2 iso9660 gzio linux acpi normal cpio crypto disk boot crc64 \
+search_fs_uuid tftp xzio xfs video"
+# chroot /tmp/rootfs /bin/bash
+#apt-get update
+#apt-get -y install grub-efi
+#grub-install --target=x86_64-efi --efi-directory=$ESP/EFI/BOOT --boot-directory=$ESP/EFI/BOOT --bootloader-id=grub ${ESP} 
+grub-mkimage -O x86_64-efi -o BOOTX64.EFI -p $ESP/EFI/BOOT ${GRUB_MODULES} linuxefi;
 
 # Syslinux needs kernel and initrd on same partition.
 cp /slim-vm/boot/vmlinuz $ESP/EFI/BOOT/vmlinuz
 cp /slim-vm/boot/initrd $ESP/EFI/BOOT/initrd
 
-# Copy syslinux efi files
-cp syslinux-6.03/efi64/efi/syslinux.efi $ESP/EFI/BOOT/bootx64.efi
-cp syslinux-6.03/efi64/com32/elflink/ldlinux/ldlinux.e64 $ESP/EFI/BOOT/ldlinux.e64
-
 # Prepare rootfs partition
 mkfs.ext4 ${LOOPDEV}p2
-mkdir -p /tmp/rootfs
+mkdir -p /tmp/rootfs 
 mount -t ext4 ${LOOPDEV}p2 /tmp/rootfs
+mkdir -p /tmp/rootfs/boot/grub
 
 # Copy extracted rootfs into mounted image
 echo "Copying rootfs"
@@ -89,6 +107,22 @@ echo "LABEL=slim-rootfs	/	 ext4	discard,errors=remount-ro	0 1" >> /tmp/rootfs/et
 
 # Label
 tune2fs -O ^read-only -L "slim-rootfs" ${LOOPDEV}p2
+
+# Grub stuff
+# cat > /tmp/rootfs/boot/grub/device.map << EOF
+# (hd0)   ${LOOPDEV}
+# (hd0,msdos1) ${LOOPDEV}p1
+# EOF
+
+
+# grub-install   --no-floppy \
+#               --grub-mkdevicemap=/tmp/rootfs/boot/grub/device.map \
+#               --modules="part_msdos ext2 configfile normal search_fs_uuid" \
+#               --target=x86_64-efi \
+#               --efi-directory=${ESP}/EFI/BOOT \
+#               --root-directory=/tmp/rootfs \
+#               --debug \
+#               ${LOOPDEV}
 
 # Cleanup
 umount ${LOOPDEV}p1
