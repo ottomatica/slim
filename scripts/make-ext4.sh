@@ -31,5 +31,4 @@ tune2fs -O ^read-only -L "slim-rootfs" rootfs.ext4
 # Store back on host
 mv rootfs.ext4 /out/rootfs
 
-
 echo "Saved rootfs raw image."
