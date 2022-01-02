@@ -77,13 +77,13 @@ cat >> $ESP/EFI/BOOT/grub.cfg <<EOF
 set timeout=0
 set gfxpayload=text
 menuentry 'Slim' {
-	linuxefi /EFI/BOOT/kernel root=/dev/sda2 console=tty0 console=ttyS0,115200n8 text
+	linuxefi /EFI/BOOT/vmlinuz root=/dev/sda2 console=tty0 console=ttyS0,115200n8 earlyprintk=ttyS0,115200 rootdelay=300 text
   initrdefi /EFI/BOOT/initrd
 }
 EOF
 
-GRUB_MODULES="part_gpt fat ext2 iso9660 gzio linux acpi normal cpio crypto disk boot crc64 \
-search_fs_uuid tftp xzio xfs video"
+GRUB_MODULES="part_gpt part_msdos gptsync fat ext2 lvm iso9660 lsefi gzio linux linuxefi acpi normal cpio crypto disk boot crc64 \
+search_fs_uuid tftp xzio lzopio xfs video scsi multiboot"
 # chroot /tmp/rootfs /bin/bash
 #apt-get update
 #apt-get -y install grub-efi
@@ -96,9 +96,9 @@ cp /slim-vm/boot/vmlinuz $ESP/EFI/BOOT/vmlinuz
 cp /slim-vm/boot/initrd $ESP/EFI/BOOT/initrd
 
 # Prepare rootfs partition
-mkfs.ext4 ${LOOPDEV}p2
+mkfs.ext2 ${LOOPDEV}p2
 mkdir -p /tmp/rootfs 
-mount -t ext4 ${LOOPDEV}p2 /tmp/rootfs
+mount -t ext2 ${LOOPDEV}p2 /tmp/rootfs
 mkdir -p /tmp/rootfs/boot/grub
 
 # Copy extracted rootfs into mounted image
