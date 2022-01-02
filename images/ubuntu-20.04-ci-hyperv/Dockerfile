@@ -20,6 +20,6 @@ RUN mv /boot/vmlinuz-* /vmlinuz
 RUN mv /boot/initrd.img-* /initrd
 
 # Needed for configuring server and setting up devices.
-# RUN apt install cloud-init udev kmod -y
+RUN apt install cloud-init udev kmod -y
 # Quality of life:
 RUN apt install openssh-server sudo -y
