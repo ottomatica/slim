@@ -89,8 +89,8 @@ tar -xf /slim-vm/rootfs.tar -C /tmp/rootfs
 echo "LABEL=slim-rootfs	/	 ext4	discard,errors=remount-ro	0 1" >> /tmp/rootfs/etc/fstab
 
 # Syslinux/Grub needs kernel and initrd on same partition.
-mv /tmp/rootfs/vmlinuz $ESP/EFI/BOOT/vmlinuz
-mv /tmp/rootfs/initrd $ESP/EFI/BOOT/initrd
+cp /tmp/rootfs/vmlinuz $ESP/EFI/BOOT/vmlinuz
+cp /tmp/rootfs/initrd $ESP/EFI/BOOT/initrd
 
 # Cleanup
 umount ${LOOPDEV}p1
