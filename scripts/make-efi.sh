@@ -88,7 +88,8 @@ search_fs_uuid tftp xzio xfs video"
 #apt-get update
 #apt-get -y install grub-efi
 #grub-install --target=x86_64-efi --efi-directory=$ESP/EFI/BOOT --boot-directory=$ESP/EFI/BOOT --bootloader-id=grub ${ESP} 
-grub-mkimage -O x86_64-efi -o BOOTX64.EFI -p $ESP/EFI/BOOT ${GRUB_MODULES} linuxefi;
+grub-mkimage -O x86_64-efi -o BOOTX64.EFI ${GRUB_MODULES} linuxefi;
+cp BOOTX64.EFI $ESP/EFI/BOOT/BOOTX64.EFI
 
 # Syslinux needs kernel and initrd on same partition.
 cp /slim-vm/boot/vmlinuz $ESP/EFI/BOOT/vmlinuz
