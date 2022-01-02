@@ -22,10 +22,6 @@ sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | fdisk rootfs.ext4
   2 # partion number 2
     # default, start immediately after preceding partition
     # default, extend partition to end of disk
-  t # Change type
-  2 # partion number 2
-  t # ext4
-  83 # Linux
   a # make a partition bootable
   1 # bootable partition is partition 1 -- /dev/sda1
   p # print the in-memory partition table
@@ -98,6 +94,9 @@ tune2fs -O ^read-only -L "slim-rootfs" ${LOOPDEV}p2
 umount ${LOOPDEV}p1
 umount ${LOOPDEV}p2
 losetup -d ${LOOPDEV}
+
+fsck -f rootfs.ext4
+
 
 # Store back on host
 mv rootfs.ext4 /out/rootfs

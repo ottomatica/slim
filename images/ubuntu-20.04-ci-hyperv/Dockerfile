@@ -5,13 +5,14 @@ RUN apt-get update && \
     apt-get clean
 
 RUN echo $' \n\
-hv_balloon\n\
+hv_blkvsc\n\
 hv_utils\n\
 hv_vmbus\n\
 hv_sock\n\
 hv_storvsc\n\
 hv_netvsc\n' >> /etc/initramfs-tools/modules
 
+# hv_balloon\n\
 RUN update-initramfs -u
 
 # Move for easier extraction.
@@ -19,6 +20,6 @@ RUN mv /boot/vmlinuz-* /vmlinuz
 RUN mv /boot/initrd.img-* /initrd
 
 # Needed for configuring server and setting up devices.
-RUN apt install cloud-init udev kmod -y
+# RUN apt install cloud-init udev kmod -y
 # Quality of life:
 RUN apt install openssh-server sudo -y
