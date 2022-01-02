@@ -37,6 +37,8 @@ sgdisk --clear \
 
   # --new 1::+1M --typecode=1:ef02 --change-name=1:'BIOS boot partition' \
 
+gdisk -l rootfs.ext4
+
 # Automatically mount partitions on loop devices.
 # losetup --partscan --find --show rootfs.ext4
 
@@ -90,8 +92,8 @@ menuentry 'Slim' {
 }
 EOF
 
-GRUB_MODULES="part_gpt part_msdos gptsync fat ext2 lvm iso9660 lsefi gzio linux linuxefi acpi normal cpio crypto disk boot crc64 \
-search_fs_uuid tftp xzio lzopio xfs video scsi multiboot"
+GRUB_MODULES="part_gpt part_msdos efi_uga gptsync fat ext2 lvm iso9660 lsefi gzio linux linuxefi acpi normal cpio crypto disk boot crc64 \
+search_fs_uuid tftp xzio lzopio xfs video scsi multiboot hfsplus udf"
 # chroot /tmp/rootfs /bin/bash
 #apt-get update
 #apt-get -y install grub-efi
@@ -104,13 +106,14 @@ cp /slim-vm/boot/vmlinuz $ESP/EFI/BOOT/vmlinuz
 cp /slim-vm/boot/initrd $ESP/EFI/BOOT/initrd
 
 # Prepare rootfs partition
-mkfs.ext4 ${LOOPDEV}p2
+mkfs.ext4 -F -L "slim-rootfs" ${LOOPDEV}p2
 mkdir -p /tmp/rootfs 
 mount -t ext4 ${LOOPDEV}p2 /tmp/rootfs
 mkdir -p /tmp/rootfs/boot/grub
 
 # Copy extracted rootfs into mounted image
 echo "Copying rootfs"
+
 #cp -a /slim-vm/. /tmp/rootfs
 rsync -a /slim-vm/ /tmp/rootfs/
 
