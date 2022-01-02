@@ -1,8 +1,7 @@
 FROM ubuntu:20.04
 RUN apt-get update && \
     # kernel, hyper-v support, and other virtual tooling.
-    apt-get install -y linux-virtual linux-cloud-tools-virtual linux-tools-virtual && \
-    apt-get clean
+    apt-get install -y linux-virtual linux-cloud-tools-virtual linux-tools-virtual
 
 RUN echo $' \n\
 hv_blkvsc\n\
@@ -23,3 +22,4 @@ RUN mv /boot/initrd.img-* /initrd
 RUN apt install cloud-init udev kmod -y
 # Quality of life:
 RUN apt install openssh-server sudo -y
+RUN apt clean
