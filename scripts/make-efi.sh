@@ -115,7 +115,7 @@ mkdir -p /tmp/rootfs/boot/grub
 echo "Copying rootfs"
 
 #cp -a /slim-vm/. /tmp/rootfs
-rsync -a /slim-vm/ /tmp/rootfs/
+rsync -a /slim-vm/ /tmp/rootfs
 
 echo "LABEL=slim-rootfs	/	 ext4	discard,errors=remount-ro	0 1" >> /tmp/rootfs/etc/fstab
 
