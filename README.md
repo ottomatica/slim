@@ -64,7 +64,7 @@ See [images/alpine3.12-raw](images/alpine3.12-raw).
 2. Build initrd and kernel.
 
 ```bash
-$ slim build images/alpine3.12-raw
+$ slim build images/alpine3.12-raw -f initrd
 ...
 $ ls -lh ~/.slim/registry/alpine3.12-raw         
 -rw-r--r--  1 cjparnin  staff    22M Jan  2 20:50 initrd
