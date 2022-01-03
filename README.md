@@ -1,132 +1,110 @@
 # slim | [![Build Status](https://travis-ci.org/ottomatica/slim.svg?branch=master)](https://travis-ci.org/ottomatica/slim)
 
-`slim` will build a micro-vm from a Dockerfile. Slim works by building and extracting a rootfs from a Dockerfile, and then merging that filesystem with a small minimal kernel that runs in RAM.
+`slim` will build a VM from a Dockerfile. Slim works by building and extracting a rootfs from a Dockerfile, and packaging a corresponding kernel and initrd into a desired image.
 
-This results in a real VM that can boot instantly, while using very limited resources. If done properly, slim can allow you to design and build immutable unikernels for running services, or build tiny and embedded development environments.
+This results in a real VM that can boot instantly, while using very limited resources.
 
 ## Using slim
 
-### Build a micro-vm
+The following are a few ways you can use slim to build VM images.
 
-Create a micro-vm from a Dockerfile. Use `build` command with a directory containing a Dockerfile.
+### Create a custom Alpine RAM only VM Image
 
-```
-$ slim build images/alpine3.8-simple
-```
+1. Provide a Dockerfile and custom init script.
 
-![build](doc/img/build.png)
+See [images/alpine3.12-raw](images/alpine3.12-raw).
 
-This will add a bootable iso in the slim registry. [See example Dockerfile](https://github.com/ottomatica/slim/tree/master/images/alpine3.8-simple).
+2. Build initrd and kernel.
 
-`slim build` will use your [default provider](#running-a-micro-vm) unless the `-p` flag is specified (ie `-p hyperkit`).
-
-### Listing micro-vm images
-
-See a list of micro-vm images on your machine.
-
-```
-$ slim images
+```bash
+$ slim build images/ubuntu-20.04-cloud-init
+...
+$ ls -lh ~/.slim/registry/alpine3.12-raw         
+-rw-r--r--  1 cjparnin  staff    22M Jan  2 20:50 initrd
+-rw-r--r--  1 cjparnin  staff   4.6M Dec 28 11:22 vmlinuz
 ```
 
-![images command](doc/img/images.png)
+### Build a Ubuntu Focal Cloud Raw VM Image 
 
-### Running a micro-vm
+1. Provide a Dockerfile `images/ubuntu-20.04-cloud-init`
 
-Provision a new instance of the given micro-vm image as a virtual machine.
+```Dockerfile
+FROM ubuntu:20.04 AS kernel
+RUN apt-get update && \
+    apt-get install -y linux-virtual && \
+    apt-get clean
 
-Slim currently supports Virtualbox, KVM, and hyperkit (MacOS only) as providers for running VMs. Slim will discover all available providers, defaulting to virtualbox, if more than one provider is available.  The `-p` flag can be used to force Slim to use a specific provider.
+FROM ubuntu:20.04
 
-Using hyperkit (requires sudo):
+# Extract the kernel, modules, and initrd
+COPY --from=kernel /lib/modules /lib/modules
+COPY --from=kernel /boot/vmlinuz-* /vmlinuz
+COPY --from=kernel /boot/initrd.img-* /initrd
 
-```
-$ slim run micro1 alpine3.8-simple -p hyperkit
-```
-
-![nanobox](doc/img/nanobox.png)
-
-Using virtualbox:
-
-```
-$ slim run micro2 alpine3.8-simple
-```
-
-![nanobox](doc/img/run-vbox.png)
-
-VirtualBox will run the micro-vm instance as an attached iso loaded into a cdrom, and boot up the iso in seconds.
-
-For convenience, a ssh connection command is provided at the end of the command, allowing easy access into the machine:
-
-Example: `ssh -i /Users/cjparnin/.slim/baker_rsa root@127.0.0.1 -p 2008 -o StrictHostKeyChecking=no`
-
-## Advanced Features
-
-#### Build formats
-
-Slim supports building multiple image formats, but by default will only build the image required for the given provider. The `-f` flag can be used to specify any additional image formats that should be built, which will be stored in the registry directory for that image. The currently supported formats and their corresponding providers are:
-
-&#8203; | raw | iso | qcow2
---- | --- | --- | ---
-kvm | ✓ | ✓ | ✓
-hyperkit | ✓ | ✓ |
-virtualbox | ✓ | ✓ |
-
-* The `raw` format signifies an unbundled ramfs archive and kernel.
-
-Example: running `slim build images/alpine3.8-simple -p kvm -f qcow2` will build a `raw` image (KVM's default image format), as well as a `qcow2` image.
-
-#### Shared Folders
-
-Slim will automatically mount `/` at `/host` and `cwd` (ie the directory where you run the slim run command) at `/slim` within the VM. This automounting can be disabled by passing the `--sync=no` option in the slim run command. The example [alpine3.8-simple](https://github.com/ottomatica/slim/tree/master/images/alpine3.8-simple) and [ubuntu16.04-simple](https://github.com/ottomatica/slim-images/tree/master/ubuntu16.04-simple) images illustrate how to support mounting within the image, and is documented [here](https://github.com/ottomatica/slim/issues/39).
-
-#### Build and run parameters
-
-* Using `slim build <image> --no-cache` will skip the docker build cache, allowing you to repair stale apt-get caches, for example.
-* Using `slim run v0 ubuntu16.04-jenkins --memory 4096 --cpus 2` will allow you allocate more memory and cpus to your instance.
-
-#### Managing vms and images
-
-* You can get a list of vms with `slim vms`.
-* Force shutdown of a vm. `slim stop micro1` (Note: for hyperkit, this will be the equivalent of delete.)
-* You can delete a specific vm called "v0" with `slim delete vm v0`
-* You can delete a specific image in registry called "ubuntu" with `slim delete image ubuntu`
-* You can clean out the entire image registry with `slim clean`.
-
-#### Extending base images (experimental)
-
-Instead of having to copy and extend an existing Dockerfile, we're experimenting with a reuse pattern that lets you reference an existing base image hosted in a git repository, and extend it by passing in build arguments. For example, by defining this in an `info.yml`, you could extend the base alpine3.9 image with ansible and runc.
-
-```
-description: A simple configuration server with ansible and runc (for running containers).
-base_repository: https://github.com/ottomatica/slim
-base_directory: images/alpine3.9-simple
-base_args:
-  PKGS: runc ansible
+RUN apt-get update 
+# Needed for configuring server and setting up devices.
+RUN apt install cloud-init udev kmod -y
+# If you'd like to be able to ssh in:
+RUN apt install openssh-server sudo -y
 ```
 
-## Example micro-vms
+2. Extract an initrd, rootfs, and uncompressed kernel.
 
-A collection of micro-vms can be found here, including ubuntu base images, jenkins, kubenetes, and more: https://github.com/ottomatica/slim-images
+```
+$ slim build images/ubuntu-20.04-cloud-init
+...
+$ ls -lh ~/.slim/registry/ubuntu-20.04-cloud-init
+-rw-r--r--  1 cjparnin  staff    16M Jan  2 17:37 initrd
+-rw-r--r--  1 cjparnin  staff   512M Jan  2 19:24 rootfs
+-rw-------@ 1 cjparnin  staff    29M Nov  5 12:04 vmlinuz
+```
+
+3. Provide a user-data and meta-data file to customize VM.
+
+```
+$ slim cloudinit images/ubuntu-20.04-cloud-init
+...
+$ ls -lh ~/.slim/registry/ubuntu-20.04-cloud-init
+-rw-r--r--  1 cjparnin  staff   366K Jan  2 21:19 cidata.iso
+```
+
+### Create a Hyper-V VHD Image
+
+The following creates a Ubuntu Focal with cloud-init, but the necessary hyper-v kernel modules,
+and bootable image for Microsoft's Hyper-V.
+
+1. Provide a Dockerfile.
+
+See [images/ubuntu-20.04-ci-hyperv](images/ubuntu-20.04-ci-hyperv).
+
+2. Create a VHD disk drive (1G) with EFI bootable partition.
+
+```
+PS slim build images/ubuntu-20.04-ci-hyperv -f vhd -s 1024
+...
+PS ls ~/.slim/registry/ubuntu-20.04-ci-hyperv
+...
+```
+
+3. Provide a user-data and meta-data file to customize VM.
+
+```
+$ slim cloudinit images/ubuntu-20.04-ci-hyperv
+...
+$ ls -lh ~/.slim/registry/ubuntu-20.04-cloud-init
+-rw-r--r--  1 cjparnin  staff   366K Jan  2 21:19 cidata.iso
+```
 
 ## Installing slim
 
-Simply clone this repo and run:
+Simply clone this repo, cd slim, and run:
 
 ```
 npm install
 npm link
+
+# Pull docker images used for system dependencies.
+slim init
 ```
 
-Unfortunately, due to the experimental nature, there are a few system dependencies you must also install:
-
-* [docker](https://docs.docker.com/install/), for building and extracting the kernel and filesystem.
-* cdrtools: `brew install cdrtools`, for building the micro-vm iso.
-
-To boot and run the image, you also need a hypervisor:
-
-* [VirtualBox](https://www.virtualbox.org/wiki/Downloads), `kvm` on Linux, or `hyperkit` on macOS.
-
-For kvm, you can install the following dependencies for ubuntu:
-
-```bash
-sudo apt-get install qemu-kvm libvirt-bin virtinst bridge-utils cpu-checker mkisofs
-```
+You must have [docker](https://docs.docker.com/install/) on your system.
