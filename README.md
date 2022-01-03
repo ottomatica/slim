@@ -4,8 +4,6 @@
 
 This results in a real VM that can boot instantly, while using very limited resources---all with a couple of lines in a Dockerfile.
 
-![slim in MacOS](doc/img/macos.png)
-
 ## Using slim
 
 The following are a few ways you can use slim to build VM images.
