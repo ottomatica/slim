@@ -4,7 +4,6 @@
 
 This results in a real VM that can boot instantly, while using very limited resources---all with a couple of lines in a Dockerfile.
 
-Slim VM Running in MacOS M1:
 ![slim in MacOS](doc/img/macos.png)
 
 ## Using slim
