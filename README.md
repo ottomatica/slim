@@ -2,29 +2,15 @@
 
 `slim` will build a VM from a Dockerfile. Slim works by building and extracting a rootfs from a Dockerfile, and packaging a corresponding kernel and initrd into a desired image.
 
-This results in a real VM that can boot instantly, while using very limited resources.
+This results in a real VM that can boot instantly, while using very limited resources---all with a couple of lines in a Dockerfile.
+
+![slim in MacOS](doc/img/macos.png)
 
 ## Using slim
 
 The following are a few ways you can use slim to build VM images.
 
-### Create a custom Alpine RAM only VM Image
-
-1. Provide a Dockerfile and custom init script.
-
-See [images/alpine3.12-raw](images/alpine3.12-raw).
-
-2. Build initrd and kernel.
-
-```bash
-$ slim build images/ubuntu-20.04-cloud-init
-...
-$ ls -lh ~/.slim/registry/alpine3.12-raw         
--rw-r--r--  1 cjparnin  staff    22M Jan  2 20:50 initrd
--rw-r--r--  1 cjparnin  staff   4.6M Dec 28 11:22 vmlinuz
-```
-
-### Build a Ubuntu Focal Cloud Raw VM Image 
+### Build a Ubuntu Focal Cloud Raw VM Image
 
 1. Provide a Dockerfile `images/ubuntu-20.04-cloud-init`
 
@@ -68,7 +54,26 @@ $ ls -lh ~/.slim/registry/ubuntu-20.04-cloud-init
 -rw-r--r--  1 cjparnin  staff   366K Jan  2 21:19 cidata.iso
 ```
 
-### Create a Hyper-V VHD Image
+VM Running in MAC M1 (arm64).
+![slim in macos](doc/img/macos.png)
+
+### Create a custom Alpine RAM only VM Image
+
+1. Provide a Dockerfile and custom init script.
+
+See [images/alpine3.12-raw](images/alpine3.12-raw).
+
+2. Build initrd and kernel.
+
+```bash
+$ slim build images/alpine3.12-raw
+...
+$ ls -lh ~/.slim/registry/alpine3.12-raw         
+-rw-r--r--  1 cjparnin  staff    22M Jan  2 20:50 initrd
+-rw-r--r--  1 cjparnin  staff   4.6M Dec 28 11:22 vmlinuz
+```
+
+### Create a Hyper-V VHD Image (Windows)
 
 The following creates a Ubuntu Focal with cloud-init, but the necessary hyper-v kernel modules,
 and bootable image for Microsoft's Hyper-V.
@@ -83,7 +88,7 @@ See [images/ubuntu-20.04-ci-hyperv](images/ubuntu-20.04-ci-hyperv).
 PS slim build images/ubuntu-20.04-ci-hyperv -f vhd -s 1024
 ...
 PS ls ~/.slim/registry/ubuntu-20.04-ci-hyperv
-...
+-a----          1/2/2022   3:19 PM      738381824 rootfs.vhd
 ```
 
 3. Provide a user-data and meta-data file to customize VM.
@@ -91,9 +96,11 @@ PS ls ~/.slim/registry/ubuntu-20.04-ci-hyperv
 ```
 $ slim cloudinit images/ubuntu-20.04-ci-hyperv
 ...
-$ ls -lh ~/.slim/registry/ubuntu-20.04-cloud-init
--rw-r--r--  1 cjparnin  staff   366K Jan  2 21:19 cidata.iso
+$ ls -lh ~/.slim/registry/ubuntu-20.04-ci-hyperv
+-a----          1/1/2022   3:32 PM         374784 cidata.iso
 ```
+
+![slim in hyperv](doc/img/slim-hyperv.png)
 
 ## Installing slim
 
