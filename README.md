@@ -17,7 +17,7 @@ See [images/alpine3.12-raw](images/alpine3.12-raw).
 2. Build initrd and kernel.
 
 ```bash
-$ slim build images/ubuntu-20.04-cloud-init
+$ slim build images/alpine3.12-raw
 ...
 $ ls -lh ~/.slim/registry/alpine3.12-raw         
 -rw-r--r--  1 cjparnin  staff    22M Jan  2 20:50 initrd
@@ -67,6 +67,7 @@ $ slim cloudinit images/ubuntu-20.04-cloud-init
 $ ls -lh ~/.slim/registry/ubuntu-20.04-cloud-init
 -rw-r--r--  1 cjparnin  staff   366K Jan  2 21:19 cidata.iso
 ```
+![slim in hyperv](doc/img/macos.png)
 
 ### Create a Hyper-V VHD Image
 
@@ -83,7 +84,7 @@ See [images/ubuntu-20.04-ci-hyperv](images/ubuntu-20.04-ci-hyperv).
 PS slim build images/ubuntu-20.04-ci-hyperv -f vhd -s 1024
 ...
 PS ls ~/.slim/registry/ubuntu-20.04-ci-hyperv
-...
+-a----          1/2/2022   3:19 PM      738381824 rootfs.vhd
 ```
 
 3. Provide a user-data and meta-data file to customize VM.
@@ -91,9 +92,11 @@ PS ls ~/.slim/registry/ubuntu-20.04-ci-hyperv
 ```
 $ slim cloudinit images/ubuntu-20.04-ci-hyperv
 ...
-$ ls -lh ~/.slim/registry/ubuntu-20.04-cloud-init
--rw-r--r--  1 cjparnin  staff   366K Jan  2 21:19 cidata.iso
+$ ls -lh ~/.slim/registry/ubuntu-20.04-ci-hyperv
+-a----          1/1/2022   3:32 PM         374784 cidata.iso
 ```
+
+![slim in hyperv](doc/img/slim-hyperv.png)
 
 ## Installing slim
 
