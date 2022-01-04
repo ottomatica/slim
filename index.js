@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 const yargs       = require('yargs');
-const storage     = require('node-persist');
 const { version } = require('./package.json');
 
 const { check } = require('./lib/dependencies');
@@ -12,8 +11,7 @@ const env = require('./lib/env');
 // - required files
 (async () => {
     await env.setup();
-    const { persistdir } = env.vars();
-    await storage.init({dir: persistdir});
+    const {} = env.vars();
 
     yargs
         .middleware(check)
