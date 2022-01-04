@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches-ignore:
+      - dependabot/**
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    # - name: Install bakerx
+    #   run: sudo npm install -g ottomatica/bakerx
+    - name: Install slim dependencies
+      run: npm i && npm link
+    - name: Run init and build
+      run: |
+        slim init
+        slim build images/alpine3.12-raw
