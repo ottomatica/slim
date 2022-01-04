@@ -1,4 +1,4 @@
-# slim | [![Build Status](https://travis-ci.org/ottomatica/slim.svg?branch=master)](https://travis-ci.org/ottomatica/slim)
+# slim | ![CI](https://github.com/ottomatica/slim/workflows/CI/badge.svg)
 
 `slim` will build a VM from a Dockerfile. Slim works by building and extracting a rootfs from a Dockerfile, and packaging a corresponding kernel and initrd into a desired image.
 
