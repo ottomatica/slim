@@ -28,4 +28,4 @@ jobs:
     - name: Run init and build
       run: |
         slim init
-        slim build images/alpine3.12-raw
+        slim build images/alpine3.12-raw -f initrd
