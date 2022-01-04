@@ -34,7 +34,7 @@
     "js-yaml": "^3.13.1",
     "node-persist": "^3.1.0",
     "progress": "^2.0.3",
-    "simple-git": "^1.131.0",
+    "simple-git": "^2.48.0",
     "tar": "^6.1.11",
     "yargs": "^17.3.1"
   }
