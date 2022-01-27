@@ -13,6 +13,20 @@ tar -xf /slim-vm/rootfs.tar -C /tmp/rootfs
 # Mount rootfs on boot.
 echo "LABEL=slim-rootfs	/	 ext4	discard,errors=remount-ro	0 1" >> /tmp/rootfs/etc/fstab
 
+# Docker overrides /etc/hosts and /etc/hostname and will export blank versions.
+# Patch /etc/hosts and /etc/hostname
+cat << 'EOF' > /tmp/rootfs/etc/hosts
+127.0.0.1	localhost
+127.0.1.1   slim
+::1	localhost ip6-localhost ip6-loopback
+fe00::0	ip6-localnet
+ff00::0	ip6-mcastprefix
+ff02::1	ip6-allnodes
+ff02::2	ip6-allrouters
+EOF
+
+echo "slim" > /tmp/rootfs/etc/hostname
+
 echo "Extracting uncompressed kernel"
 mv /tmp/rootfs/vmlinuz /out/tmp.gz
 gzip -d /out/tmp.gz
