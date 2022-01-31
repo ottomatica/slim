@@ -1,0 +1,68 @@
+#!/bin/sh
+
+# Fix rootfs
+
+# Copy initramfs to /mnt and chroot
+mkfs.ext4 /dev/vda
+
+mount -t tmpfs -o size=90% tmpfs /mnt
+mount /dev/vda /docker
+rsync -av --exclude "/mnt" / /mnt
+
+# Create mountpoints
+# mkdir -p /media/root-ro /media/root-rw $sysroot/media/root-ro \
+#     $sysroot/media/root-rw
+# # Mount read-only underlying rootfs
+# rootflags="ro"
+# mount -t rootfs -o $rootflags /mnt /media/root-ro
+
+# # Mount writable overlay tmpfs
+# mount -t tmpfs -o $overlaytmpfsflags root-tmpfs /media/root-rw
+# # Create additional mountpoints and do the overlay mount
+# mkdir -p /media/root-rw/work /media/root-rw/root
+# mount -t overlay -o \
+#     lowerdir=/media/root-ro,upperdir=/media/root-rw/root,workdir=/media/root-rw/work \
+#     overlayfs $sysroot
+
+# tar -C / --exclude=mnt -cf - . | tar -C /mnt/ -xf -
+
+#cd /mnt
+#mount --move . /
+#cd /
+#mount --rbind /mnt /mnt
+#exec  chroot . /real_init
+
+# proc
+mount -t proc proc /proc -o nodev,nosuid,noexec,relatime
+
+# dev
+mount -t devtmpfs dev /dev -o nosuid,noexec,relatime,size=10m,nr_inodes=248418,mode=755
+mknod -m 0600 /dev/console c 5 1
+mknod -m 0620 /dev/tty1 c 4 1
+mknod -m 0666 /dev/tty 5 0
+mknod -m 0666 /dev/null 1 3
+mknod -m 0660 /dev/kmsg 1 11
+
+ln -s /proc/self/fd /dev/fd
+ln -s /proc/self/fd/0 /dev/stdin
+ln -s /proc/self/fd/1 /dev/stdout
+ln -s /proc/self/fd/2 /dev/stderr
+ln -s /proc/kcore /dev/kcore
+
+mkdir -m 01777 /dev/mqueue
+mkdir -m 01777 /dev/shm
+mkdir -m 0755 /dev/pts
+
+mount -t mqueue mqueue /dev/mqueue -o noexec,nosuid,nodev
+mount -t tmpfs shm /dev/shm -o noexec,nosuid,nodev,mode=1777
+mount -t devpts devpts /dev/pts -o noexec,nosuid,gid=5,mode=0620
+
+mount -t sysfs sysfs /sys -o noexec,nosuid,nodev
+
+mount --move /sys /mnt/sys
+mount --move /proc /mnt/proc
+mount --move /dev /mnt/dev
+
+#exec /bin/busybox switch_root /mnt /real_init
+#echo "initramfs emergency recovery shell launched"
+exec chroot /mnt /real_init
