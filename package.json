@@ -29,7 +29,7 @@
     "cpio-fs": "^1.1.0",
     "dockerode": "^3.3.1",
     "download": "^8.0.0",
-    "fs-extra": "^10.0.0",
+    "fs-extra": "^10.0.1",
     "hasbin": "^1.2.3",
     "js-yaml": "^3.13.1",
     "progress": "^2.0.3",
